@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🏀 Ponte di Nona - Esordienti Live</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6B00;
+    --blue-dark: #003087;
+    --blue-mid: #1565C0;
+    --dark: #0d1b2a;
+    --darker: #081422;
+    --surface: #132035;
+    --text: #f0f4f8;
+    --text-dim: #8fa5bb;
+    --foul-red: #ef5350;
+    --green: #4caf50;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  /* ─── SCOREBOARD PRINCIPALE ─── */
+  .scoreboard-main {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, #001a5e 100%);
+    border-radius: 20px;
+    padding: 30px 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    border: 2px solid var(--orange);
+  }
+
+  .score-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-bottom: 15px;
+  }
+
+  .team {
+    text-align: center;
+    flex: 1;
+  }
+
+  .team-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+  }
+
+  .team.home .team-name {
+    color: var(--orange);
+  }
+
+  .team.away .team-name {
+    color: #64b5f6;
+  }
+
+  .score-big {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 110px; /* INGRANDITO DA 80px */
+    font-weight: 900;
+    line-height: 0.95;
+    margin-bottom: 10px;
+  }
+
+  .team.home .score-big {
+    color: var(--orange);
+    animation: scoreUpdate 0.5s ease-out;
+  }
+
+  .team.away .score-big {
+    color: #64b5f6;
+    animation: scoreUpdate 0.5s ease-out;
+  }
+
+  @keyframes scoreUpdate {
+    0% {
+      transform: scale(1.1);
+      text-shadow: 0 0 20px rgba(255, 107, 0, 0.8);
+    }
+    100% {
+      transform: scale(1);
+      text-shadow: none;
+    }
+  }
+
+  .separator {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 60px;
+    font-weight: 300;
+    color: var(--text-dim);
+    margin: 0 10px;
+  }
+
+  /* ─── CONTENITORE RIGA QUARTI (ATTUALE + STORICO) ─── */
+  .quarters-container-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    margin-top: 15px;
+    justify-content: center;
+  }
+
+  /* BOX QUARTO ATTUALE RIDOTTO */
+  .quarter-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 6px 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 80px;
+  }
+
+  .quarter-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; /* RIDOTTO DA 13px */
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .quarter-number {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px; /* RIDOTTO DA 36px */
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  /* STORICO QUARTI INGRANDITO */
+  .quarters-history {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .q-box {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.25);
+    border: 2px solid rgba(255, 107, 0, 0.5); /* BORDO ARANCIONE DEDICATO PIÙ EVIDENTE */
+    border-radius: 12px;
+    padding: 8px 14px; /* MAGGIORE SPAZIATURA */
+    text-align: center;
+    min-width: 70px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .q-box-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px; /* INGRANDITO DA 11px */
+    font-weight: 800;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .q-box-row {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; /* INGRANDITO DA 14px PER MASSIMA LEGGIBILITÀ */
+    font-weight: 900;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .q-box-h { color: var(--orange); }
+  .q-box-sep { color: var(--text-dim); margin: 0 3px; font-size: 14px; font-weight: 400; }
+  .q-box-a { color: #64b5f6; }
+
+  /* ─── TIMER (grande, leggibile da lontano) ─── */
+  .game-clock-row {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 10px 12px 14px;
+    text-align: center;
+    margin-top: 15px;
+  }
+
+  .game-clock-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .game-clock {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-size: 76px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 2px;
+    color: var(--text);
+    text-shadow: 0 0 20px rgba(255,255,255,0.08);
+    transition: color 0.3s ease;
+  }
+
+  .game-clock.running {
+    color: var(--green);
+    text-shadow: 0 0 24px rgba(76,175,80,0.5);
+  }
+
+  .game-clock.danger {
+    color: var(--foul-red);
+    text-shadow: 0 0 24px rgba(239,83,80,0.6);
+    animation: clockPulse 1s ease-in-out infinite;
+  }
+
+  @keyframes clockPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @media (max-width: 480px) {
+    .game-clock { font-size: 58px; }
+  }
+
+  /* ─── FT EVENT BANNER ─── */
+  .ft-event-banner {
+    background: var(--surface);
+    border-radius: 15px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid #26A69A;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    transition: opacity 0.35s ease, max-height 0.35s ease, padding 0.35s ease, margin 0.35s ease;
+  }
+
+  .ft-event-banner.show {
+    opacity: 1;
+    max-height: 100px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+  }
+
+  .ft-event-banner.award { border-left-color: #ffb300; }
+  .ft-event-banner.made { border-left-color: var(--green); }
+  .ft-event-banner.miss { border-left-color: var(--foul-red); }
+
+  .ft-event-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .ft-event-banner.award .ft-event-label { color: #ffb300; }
+  .ft-event-banner.made .ft-event-label { color: var(--green); }
+  .ft-event-banner.miss .ft-event-label { color: var(--foul-red); }
+
+  .ft-event-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 3px;
+  }
+
+  .ft-event-icon {
+    font-size: 30px;
+    animation: ftIconPop 0.5s ease-out;
+  }
+
+  @keyframes ftIconPop {
+    0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+    60% { transform: scale(1.2) rotate(6deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  /* ─── LAST SCORER ─── */
+  .last-scorer-section {
+    background: var(--surface);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--orange);
+    transition: all 0.3s ease;
+  }
+
+  .last-scorer-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .last-scorer-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .scorer-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .scorer-points {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--orange);
+  }
+
+  /* ─── PLAYERS SECTION ─── */
+  .players-section {
+    background: var(--surface);
+    border-radius: 15px;
+    padding: 20px;
+    border-top: 3px solid var(--orange);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .section-title.bench {
+    color: var(--text-dim);
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 15px;
+  }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  .player-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    padding-right: 10px;
+  }
+
+  .player-stats {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .player-breakdown {
+    display: flex;
+    gap: 4px;
+  }
+
+  .pt-pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-dim);
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
+  }
+
+  .player-pts {
+    background: var(--orange);
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .player-fouls {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .player-fouls.f-zero {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-dim);
+  }
+
+  .player-fouls.f-active {
+    background: rgba(239, 83, 80, 0.2);
+    color: var(--foul-red);
+  }
+
+  .player-fouls.f-danger {
+    background: var(--foul-red);
+    color: white;
+  }
+
+  .empty-list-msg {
+    color: var(--text-dim);
+    font-size: 14px;
+    font-style: italic;
+    padding: 10px 5px;
+  }
+
+  /* ─── VOCI DALLO STADIO (fumetti pixel art) ─── */
+
+  /* Notifica a comparsa quando arriva un nuovo commento */
+  .voice-event-banner {
+    background: var(--surface);
+    border-radius: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border-left: 4px solid var(--orange);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 16px;
+    margin-bottom: 0;
+    transition: opacity 0.35s ease, max-height 0.4s ease, padding 0.35s ease, margin 0.35s ease;
+  }
+
+  .voice-event-banner.show {
+    opacity: 1;
+    max-height: 260px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+
+  .voice-event-banner.becero { border-left-color: #d32f2f; }
+  .voice-event-banner.giornalista { border-left-color: #1565C0; }
+  .voice-event-banner.sfegatato { border-left-color: var(--orange); }
+
+  .voice-event-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.3);
+    overflow: hidden;
+    animation: ftIconPop 0.5s ease-out;
+  }
+  .voice-event-icon svg { width: 100%; height: 100%; }
+
+  .voice-event-body { flex: 1; min-width: 0; }
+
+  .voice-event-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .voice-event-banner.becero .voice-event-label { color: #ef5350; }
+  .voice-event-banner.giornalista .voice-event-label { color: #64b5f6; }
+  .voice-event-banner.sfegatato .voice-event-label { color: var(--orange); }
+
+  .voice-event-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Pulsante flottante per rivedere tutte le voci */
+  .voices-fab {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--orange);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255,107,0,0.5);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .voices-fab:active { transform: scale(.92); }
+
+  .voices-fab-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ef5350;
+    border: 2px solid var(--darker);
+    display: none;
+  }
+  .voices-fab-dot.show { display: block; }
+
+  /* Modale "tutte le voci dallo stadio" */
+  .voices-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 300;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .voices-modal-overlay.open { display: flex; }
+
+  .voices-modal {
+    background: var(--dark);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px 16px 28px;
+    border-top: 3px solid var(--orange);
+    animation: slideUpVoices .3s ease-out;
+  }
+
+  @keyframes slideUpVoices {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .voices-modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 18px;
+  }
+
+  .voice-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .voice-icon-wrap {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.3);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255,255,255,0.08);
+  }
+  .voice-icon-wrap svg { width: 100%; height: 100%; }
+
+  .voice-icon-wrap.becero { border-color: rgba(211,47,47,0.4); }
+  .voice-icon-wrap.giornalista { border-color: rgba(21,101,192,0.4); }
+  .voice-icon-wrap.sfegatato { border-color: rgba(255,107,0,0.4); }
+
+  .speech-bubble {
+    position: relative;
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 10px 14px;
+    min-height: 40px;
+  }
+
+  .speech-bubble::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 16px;
+    width: 0; height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-right: 7px solid rgba(255,255,255,0.05);
+  }
+
+  .speech-bubble.becero { border-left: 3px solid #d32f2f; }
+  .speech-bubble.becero::before { border-right-color: rgba(211,47,47,0.15); }
+  .speech-bubble.giornalista { border-left: 3px solid #1565C0; }
+  .speech-bubble.giornalista::before { border-right-color: rgba(21,101,192,0.15); }
+  .speech-bubble.sfegatato { border-left: 3px solid var(--orange); }
+  .speech-bubble.sfegatato::before { border-right-color: rgba(255,107,0,0.15); }
+
+  .voice-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+  }
+
+  .voice-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .voice-text.placeholder {
+    color: var(--text-dim);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .btn-close-voices {
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: var(--text-dim);
+    padding: 12px;
+    border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ─── NO DATA ─── */
+  .no-data {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+
+  .loading {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .loading::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+  }
+
+  @keyframes dots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+  }
+
+  /* ─── FIREBASE STATUS ─── */
+  .firebase-status {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #4caf50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+    z-index: 999;
+  }
+
+  .firebase-status.offline {
+    background: #ff9800;
+    animation: blink-offline 0.5s infinite;
+  }
+
+  @keyframes blink-offline {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 480px) {
+    .scoreboard-main {
+      padding: 20px 15px 16px;
+    }
+
+    .score-big {
+      font-size: 85px; /* INGRANDITO IN MOBILE DA 60px */
+    }
+
+    .separator {
+      font-size: 45px;
+    }
+
+    .pt-pill {
+      font-size: 10px;
+      padding: 1px 3px;
+    }
+  }
+</style>
+</head>
+<body>
+  
+<div class="firebase-status" id="firebaseStatus"></div>
+
+<div class="container">
+  <div id="noDataView" class="no-data">
+    <div class="loading">Connessione in corso</div>
+  </div>
+
+  <div id="mainView" style="display: none;">
+    <div class="scoreboard-main">
+      <div class="score-container">
+        <div class="team home">
+          <div class="team-name" id="homeTeamName">PONTE</div>
+          <div class="score-big" id="homeScore">0</div>
+        </div>
+        <div class="separator">—</div>
+        <div class="team away">
+          <div class="team-name" id="awayTeamName">AVV</div>
+          <div class="score-big" id="awayScore">0</div>
+        </div>
+      </div>
+
+      <div class="game-clock-row">
+        <div class="game-clock-label">⏱ TEMPO QUARTO</div>
+        <div class="game-clock" id="timerNumber">08:00</div>
+      </div>
+
+      <div class="quarters-container-row">
+        <div class="quarter-info">
+          <div class="quarter-label">Quarto</div>
+          <div class="quarter-number" id="quarterNumber">1</div>
+        </div>
+
+        <div class="quarters-history" id="quartersHistoryContainer" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="ft-event-banner" id="ftEventBanner">
+      <div>
+        <div class="ft-event-label" id="ftEventLabel">Tiri liberi</div>
+        <div class="ft-event-name" id="ftEventName">-</div>
+      </div>
+      <div class="ft-event-icon" id="ftEventIcon">🎯</div>
+    </div>
+
+    <div class="last-scorer-section" id="lastScorerSection" style="display: none;">
+      <div class="last-scorer-label" id="lastScorerLabel">⭐ Ultimo marcatore</div>
+      <div class="last-scorer-info">
+        <div class="scorer-name" id="lastScorerName">-</div>
+        <div class="scorer-points" id="lastScorerPoints">0</div>
+      </div>
+    </div>
+
+    <div class="voice-event-banner" id="voiceEventBanner">
+      <div class="voice-event-icon" id="voiceEventIcon"></div>
+      <div class="voice-event-body">
+        <div class="voice-event-label" id="voiceEventLabel">-</div>
+        <div class="voice-event-text" id="voiceEventText">-</div>
+      </div>
+    </div>
+
+    <div class="players-section">
+      <div class="section-title">🏀 In Campo</div>
+      <div id="playersOnCourt"></div>
+      
+      <div class="section-title bench">🛋️ A Disposizione</div>
+      <div id="playersOnBench"></div>
+    </div>
+  </div>
+</div>
+
+<button class="voices-fab" id="voicesFab" onclick="openVoicesModal()" title="Voci dallo stadio">
+  🗣️
+  <span class="voices-fab-dot" id="voicesFabDot"></span>
+</button>
+
+<div class="voices-modal-overlay" id="voicesModalOverlay">
+  <div class="voices-modal">
+    <div class="voices-modal-title">🗣️ Voci dallo Stadio</div>
+
+    <div class="voice-row">
+      <div class="voice-icon-wrap becero" id="modal-icon-becero"></div>
+      <div class="speech-bubble becero">
+        <div class="voice-label">Il Tifoso Becero</div>
+        <div class="voice-text placeholder" id="modal-text-becero">In attesa di un commento...</div>
+      </div>
+    </div>
+    <div class="voice-row">
+      <div class="voice-icon-wrap giornalista" id="modal-icon-giornalista"></div>
+      <div class="speech-bubble giornalista">
+        <div class="voice-label">Il Giornalista Obiettivo</div>
+        <div class="voice-text placeholder" id="modal-text-giornalista">In attesa di un commento...</div>
+      </div>
+    </div>
+    <div class="voice-row">
+      <div class="voice-icon-wrap sfegatato" id="modal-icon-sfegatato"></div>
+      <div class="speech-bubble sfegatato">
+        <div class="voice-label">Il Tifoso Sfegatato</div>
+        <div class="voice-text placeholder" id="modal-text-sfegatato">In attesa di un commento...</div>
+      </div>
+    </div>
+
+    <button class="btn-close-voices" onclick="closeVoicesModal()">Chiudi</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAtkWH5ekxU7YK-LvXLR0hhb-cyrFmxc34",
+  authDomain: "basket-scoresheet.firebaseapp.com",
+  projectId: "basket-scoresheet",
+  storageBucket: "basket-scoresheet.firebasestorage.app",
+  messagingSenderId: "239574167542",
+  appId: "1:239574167542:web:abcd8f2a2d62fa132061d7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const docRef = doc(db, "matches", "current");
+
+let lastHomeScore = 0;
+let prevHomeScore = null;
+let prevAwayScore = null;
+let prevPlayersState = null;
+let currentNotification = JSON.parse(localStorage.getItem('live_last_notification') || 'null');
+
+/* ─── VOCI DALLO STADIO: pixel art + fumetti ─── */
+const PIXEL_GRIDS = {
+  becero: [
+    "......8888......",
+    "....88888888....",
+    "...8888888888...",
+    "..991111111199..",
+    ".11133322333111.",
+    ".11145111154111.",
+    "1991111111111991",
+    "1116666666666111",
+    "1117777777777111",
+    "111AAAAAAAAAA111",
+    ".11166666666111.",
+    ".11111111111111.",
+    "..212121212121..",
+    "...1111111111...",
+    "....11111111....",
+    "......1111......"
+  ],
+  giornalista: [
+    "......3333......",
+    "....33333333....",
+    "...3333333333...",
+    "..333111111333..",
+    ".11133111133111.",
+    ".11100000000111.",
+    "1104500000054011",
+    "1101111111111011",
+    "1111111661111111",
+    "1111111111111111",
+    ".11111111111111.",
+    ".11111111111111.",
+    "..111111111111..",
+    "...CCBBBBBBCC...",
+    "....BBBBBBBB....",
+    "......BBBB......"
+  ],
+  sfegatato: [
+    "......8899......",
+    "....88889999....",
+    "...8888899999...",
+    "..888888999999..",
+    ".88833889933999.",
+    ".88845889954999.",
+    "8888888899999999",
+    "8886666666666999",
+    "8887777777777999",
+    "888AAAAAAAAAA999",
+    ".88866666666999.",
+    ".88888889999999.",
+    "..888888999999..",
+    "...BBBBBBBBBB...",
+    "....CCCCCCCC....",
+    "......BBBB......"
+  ]
+};
+
+const PIXEL_PALETTES = {
+  becero: { '1':'#e8a978', '2':'#c9906a', '3':'#2b1a12', '4':'#ffffff', '5':'#1a1a1a', '6':'#7a1220', '7':'#fff8ec', '8':'#d32f2f', '9':'#a01f1f', 'A':'#ff4d4d' },
+  giornalista: { '1':'#e8a978', '3':'#3d2b1e', '0':'#263238', '4':'#ffffff', '5':'#1a1a1a', '6':'#37474f', 'C':'#ffffff', 'B':'#1565C0' },
+  sfegatato: { '1':'#e8a978', '8':'#FF6B00', '9':'#1565C0', '3':'#1a1a1a', '4':'#ffffff', '5':'#1a1a1a', '6':'#7a1220', '7':'#fff8ec', 'A':'#ff4d4d', 'B':'#ffffff', 'C':'#003087' }
+};
+
+function pixelArtSVG(grid, palette, ps) {
+  ps = ps || 6;
+  const rows = grid.length, cols = grid[0].length;
+  let rects = '';
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const ch = grid[y][x];
+      if (ch === '.' || !palette[ch]) continue;
+      rects += `<rect x="${x*ps}" y="${y*ps}" width="${ps}" height="${ps}" fill="${palette[ch]}"/>`;
+    }
+  }
+  return `<svg viewBox="0 0 ${cols*ps} ${rows*ps}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">${rects}</svg>`;
+}
+
+function renderVoiceIcons() {
+  ['becero', 'giornalista', 'sfegatato'].forEach(key => {
+    const el = document.getElementById('modal-icon-' + key);
+    if (el) el.innerHTML = pixelArtSVG(PIXEL_GRIDS[key], PIXEL_PALETTES[key], 8);
+  });
+}
+renderVoiceIcons();
+
+const VOICE_LABELS = {
+  becero: '😡 Il Tifoso Becero',
+  giornalista: '🎙️ Il Giornalista Obiettivo',
+  sfegatato: '🔥 Il Tifoso Sfegatato'
+};
+
+let prevCommentTs = { becero: null, giornalista: null, sfegatato: null };
+let voiceBannerTimeout = null;
+let voicesModalOpen = false;
+
+function showVoiceBanner(key, text) {
+  const banner = document.getElementById('voiceEventBanner');
+  const iconEl = document.getElementById('voiceEventIcon');
+  const labelEl = document.getElementById('voiceEventLabel');
+  const textEl = document.getElementById('voiceEventText');
+  if (!banner) return;
+
+  banner.classList.remove('becero', 'giornalista', 'sfegatato');
+  banner.classList.add(key);
+  iconEl.innerHTML = pixelArtSVG(PIXEL_GRIDS[key], PIXEL_PALETTES[key], 6);
+  labelEl.textContent = VOICE_LABELS[key] || key;
+  textEl.textContent = text;
+
+  if (voiceBannerTimeout) clearTimeout(voiceBannerTimeout);
+  banner.classList.remove('show');
+  void banner.offsetWidth;
+  banner.classList.add('show');
+
+  // Durata proporzionale alla lunghezza del testo, cosi' c'e' tempo di leggerlo
+  const duration = Math.min(18000, Math.max(5000, 3000 + text.length * 90));
+  voiceBannerTimeout = setTimeout(() => banner.classList.remove('show'), duration);
+}
+
+function updateVoices(comments) {
+  comments = comments || {};
+  let hasNew = false;
+
+  ['becero', 'giornalista', 'sfegatato'].forEach(key => {
+    const entry = comments[key];
+    const modalTextEl = document.getElementById('modal-text-' + key);
+
+    // Campo vuoto o assente: funge da "pulizia". Aggiorniamo la vista
+    // al placeholder ma NON mostriamo alcuna notifica/banner.
+    if (!entry || !entry.text) {
+      if (modalTextEl) {
+        modalTextEl.textContent = 'In attesa di un commento...';
+        modalTextEl.classList.add('placeholder');
+      }
+      if (entry && typeof entry.ts !== 'undefined') {
+        prevCommentTs[key] = entry.ts;
+      }
+      return;
+    }
+
+    if (modalTextEl) {
+      modalTextEl.textContent = entry.text;
+      modalTextEl.classList.remove('placeholder');
+    }
+
+    if (entry.ts !== prevCommentTs[key]) {
+      const isFirstLoad = prevCommentTs[key] === null;
+      prevCommentTs[key] = entry.ts;
+      if (!isFirstLoad) {
+        showVoiceBanner(key, entry.text);
+        if (!voicesModalOpen) hasNew = true;
+      }
+    }
+  });
+
+  if (hasNew) {
+    document.getElementById('voicesFabDot').classList.add('show');
+  }
+}
+
+function openVoicesModal() {
+  document.getElementById('voicesModalOverlay').classList.add('open');
+  document.getElementById('voicesFabDot').classList.remove('show');
+  voicesModalOpen = true;
+}
+
+function closeVoicesModal() {
+  document.getElementById('voicesModalOverlay').classList.remove('open');
+  voicesModalOpen = false;
+}
+window.openVoicesModal = openVoicesModal;
+window.closeVoicesModal = closeVoicesModal;
+
+const unsubscribe = onSnapshot(
+  docRef,
+  (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      detectChanges(data);
+      updateUI(data);
+      updateFirebaseStatus(true);
+    } else {
+      document.getElementById('noDataView').style.display = 'block';
+      document.getElementById('mainView').style.display = 'none';
+    }
+  },
+  (error) => {
+    console.error('Errore Firestore:', error);
+    updateFirebaseStatus(false);
+  }
+);
+
+function updateFirebaseStatus(online) {
+  const status = document.getElementById('firebaseStatus');
+  if (online) {
+    status.classList.remove('offline');
+  } else {
+    status.classList.add('offline');
+  }
+}
+
+function scoreExclamation(delta) {
+  if (delta >= 3) return '🎯 TRIPLA!';
+  if (delta === 2) return '🔥 CANESTRO!';
+  if (delta === 1) return '✅ LIBERO A SEGNO!';
+  return '🏀 PUNTI!';
+}
+
+function detectChanges(data) {
+  const homeScore = data.homeScore || 0;
+  const awayScore = data.awayScore || 0;
+  const homeTeam = data.homeTeam || 'PONTE';
+  const awayTeam = data.awayTeam || 'AVV';
+  const players = data.players || [];
+
+  if (prevHomeScore === null || prevAwayScore === null || prevPlayersState === null) {
+    prevHomeScore = homeScore;
+    prevAwayScore = awayScore;
+    prevPlayersState = {};
+    players.forEach(p => {
+      const pts = (p.pt1 || 0) + (p.pt2 || 0) * 2 + (p.pt3 || 0) * 3;
+      prevPlayersState[p.name] = pts;
+    });
+    return;
+  }
+
+  if (homeScore > prevHomeScore) {
+    const delta = homeScore - prevHomeScore;
+    let scorerName = homeTeam;
+    let scoreDelta = delta;
+
+    for (let p of players) {
+      const currentPts = (p.pt1 || 0) + (p.pt2 || 0) * 2 + (p.pt3 || 0) * 3;
+      const prevPts = prevPlayersState[p.name] || 0;
+      if (currentPts > prevPts) {
+        scorerName = p.name;
+        scoreDelta = currentPts - prevPts;
+        break;
+      }
+    }
+
+    currentNotification = {
+      team: 'home',
+      name: scorerName,
+      text: '+' + scoreDelta,
+      headline: scoreExclamation(scoreDelta)
+    };
+    localStorage.setItem('live_last_notification', JSON.stringify(currentNotification));
+  }
+  else if (awayScore > prevAwayScore) {
+    const delta = awayScore - prevAwayScore;
+    currentNotification = {
+      team: 'away',
+      name: awayTeam,
+      text: '+' + delta,
+      headline: '⚡ Punto avversario'
+    };
+    localStorage.setItem('live_last_notification', JSON.stringify(currentNotification));
+  }
+  else if (homeScore < prevHomeScore || awayScore < prevAwayScore) {
+    currentNotification = null;
+    localStorage.removeItem('live_last_notification');
+  }
+
+  prevHomeScore = homeScore;
+  prevAwayScore = awayScore;
+  prevPlayersState = {};
+  players.forEach(p => {
+    const pts = (p.pt1 || 0) + (p.pt2 || 0) * 2 + (p.pt3 || 0) * 3;
+    prevPlayersState[p.name] = pts;
+  });
+}
+
+function formatTime(s) {
+  s = Math.max(0, Math.round(s));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+
+let timerRunning = false;
+let timerEndAt = null;
+let timerSecondsStatic = 480;
+
+function renderTimerTick() {
+  const el = document.getElementById('timerNumber');
+  if (!el) return;
+  let remaining = timerSecondsStatic;
+  if (timerRunning && timerEndAt) {
+    remaining = Math.max(0, (timerEndAt - Date.now()) / 1000);
+  }
+  el.textContent = formatTime(remaining);
+  el.classList.toggle('running', timerRunning && remaining > 60);
+  el.classList.toggle('danger', remaining <= 60 && remaining > 0);
+}
+setInterval(renderTimerTick, 250);
+
+let prevFtEventTs = null;
+let ftBannerTimeout = null;
+
+function showFtBanner(ftEvent) {
+  const banner = document.getElementById('ftEventBanner');
+  const label = document.getElementById('ftEventLabel');
+  const name = document.getElementById('ftEventName');
+  const icon = document.getElementById('ftEventIcon');
+  if (!banner) return;
+
+  const kind = ftEvent.kind || 'award';
+  const playerName = ftEvent.name || '-';
+
+  banner.classList.remove('miss', 'made', 'award');
+
+  let labelText, nameText, iconText;
+  if (kind === 'award') {
+    banner.classList.add('award');
+    labelText = '🚨 FALLO!';
+    nameText = `Tiri liberi assegnati a ${playerName}`;
+    iconText = '🚨';
+  } else if (kind === 'made') {
+    banner.classList.add('made');
+    labelText = '✅ CANESTRO DALLA LUNETTA!';
+    nameText = `${playerName} segna il libero`;
+    iconText = '✅';
+  } else {
+    banner.classList.add('miss');
+    labelText = '❌ Peccato...';
+    nameText = `${playerName} sbaglia il libero`;
+    iconText = '❌';
+  }
+
+  label.textContent = labelText;
+  name.textContent = nameText;
+  icon.textContent = iconText;
+  icon.style.animation = 'none';
+  void icon.offsetWidth;
+  icon.style.animation = '';
+
+  if (ftBannerTimeout) clearTimeout(ftBannerTimeout);
+  banner.classList.remove('show');
+  void banner.offsetWidth;
+  banner.classList.add('show');
+  ftBannerTimeout = setTimeout(() => {
+    banner.classList.remove('show');
+  }, 4000);
+}
+
+function updateUI(data) {
+  const {
+    homeTeam = 'PONTE',
+    awayTeam = 'AVV',
+    homeScore = 0,
+    awayScore = 0,
+    quarter = 1,
+    quarterHistory = [],
+    players = [],
+    timerSeconds = 480,
+    timerRunning: docTimerRunning = false,
+    timerEndAt: docTimerEndAt = null,
+    ftEvent = null,
+    comments = null
+  } = data;
+
+  timerSecondsStatic = timerSeconds;
+  timerRunning = docTimerRunning;
+  timerEndAt = docTimerEndAt;
+  renderTimerTick();
+
+  if (ftEvent && ftEvent.ts && ftEvent.ts !== prevFtEventTs) {
+    prevFtEventTs = ftEvent.ts;
+    showFtBanner(ftEvent);
+  }
+
+  updateVoices(comments);
+
+  document.getElementById('homeTeamName').textContent = homeTeam || 'PONTE';
+  document.getElementById('awayTeamName').textContent = awayTeam || 'AVV';
+  
+  const homeScoreEl = document.getElementById('homeScore');
+  if (homeScore !== lastHomeScore) {
+    homeScoreEl.style.animation = 'none';
+    setTimeout(() => {
+      homeScoreEl.style.animation = 'scoreUpdate 0.5s ease-out';
+      homeScoreEl.textContent = homeScore;
+      lastHomeScore = homeScore;
+    }, 10);
+  } else {
+    homeScoreEl.textContent = homeScore;
+  }
+
+  document.getElementById('awayScore').textContent = awayScore;
+  document.getElementById('quarterNumber').textContent = quarter;
+
+  const qContainer = document.getElementById('quartersHistoryContainer');
+  qContainer.innerHTML = '';
+  if (quarterHistory && quarterHistory.length > 0) {
+    quarterHistory.forEach((entry) => {
+      const box = document.createElement('div');
+      box.className = 'q-box';
+      box.innerHTML = `
+        <div class="q-box-label">Q${entry.q}</div>
+        <div class="q-box-row">
+          <span class="q-box-h">${entry.home}</span>
+          <span class="q-box-sep">-</span>
+          <span class="q-box-a">${entry.away}</span>
+        </div>
+      `;
+      qContainer.appendChild(box);
+    });
+    qContainer.style.display = 'flex';
+  } else {
+    qContainer.style.display = 'none';
+  }
+
+  const lastScorerSection = document.getElementById('lastScorerSection');
+  const pointsEl = document.getElementById('lastScorerPoints');
+  const labelEl = document.getElementById('lastScorerLabel');
+
+  if (currentNotification) {
+    lastScorerSection.style.display = 'block';
+    document.getElementById('lastScorerName').textContent = currentNotification.name;
+    pointsEl.textContent = currentNotification.text;
+
+    if (currentNotification.team === 'away') {
+      lastScorerSection.style.borderLeft = '4px solid #64b5f6';
+      pointsEl.style.color = '#64b5f6';
+      labelEl.textContent = currentNotification.headline || '⚡ Canestro avversario';
+    } else {
+      lastScorerSection.style.borderLeft = '4px solid var(--orange)';
+      pointsEl.style.color = 'var(--orange)';
+      labelEl.textContent = currentNotification.headline || '⭐ Ultimo marcatore';
+    }
+  } else {
+    let topScorer = null;
+    let maxPts = 0;
+    players.forEach((p) => {
+      const pts = (p.pt1 || 0) + (p.pt2 || 0) * 2 + (p.pt3 || 0) * 3;
+      if (pts > maxPts) {
+        maxPts = pts;
+        topScorer = p.name;
+      }
+    });
+
+    if (topScorer && maxPts > 0) {
+      lastScorerSection.style.display = 'block';
+      document.getElementById('lastScorerName').textContent = topScorer;
+      pointsEl.textContent = maxPts;
+      pointsEl.style.color = 'var(--orange)';
+      lastScorerSection.style.borderLeft = '4px solid var(--orange)';
+      labelEl.textContent = '⭐ Miglior marcatore';
+    } else {
+      lastScorerSection.style.display = 'none';
+    }
+  }
+
+  // ELEMENTI DELLE DUE LISTE SEPARATE
+  const courtContainer = document.getElementById('playersOnCourt');
+  const benchContainer = document.getElementById('playersOnBench');
+  courtContainer.innerHTML = '';
+  benchContainer.innerHTML = '';
+
+  let countCourt = 0;
+  let countBench = 0;
+
+  players.forEach((p) => {
+    if (!p.active) return; // Mostra solo i convocati presenti
+
+    const pts = (p.pt1 || 0) + (p.pt2 || 0) * 2 + (p.pt3 || 0) * 3;
+    const fouls = p.fouls || 0;
+    const foulClass = fouls >= 4 ? 'f-danger' : (fouls > 0 ? 'f-active' : 'f-zero');
+
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    
+    // Stile del bordo sinistro differenziato per stato di gioco
+    if (p.onCourt) {
+      row.style.borderLeft = '3px solid var(--green)';
+    } else {
+      row.style.borderLeft = '3px solid var(--text-dim)';
+    }
+
+    row.innerHTML = `
+      <div class="player-name">${p.name}</div>
+      <div class="player-stats">
+        <div class="player-breakdown">
+          <span class="pt-pill">1p: ${p.pt1 || 0}</span>
+          <span class="pt-pill">2p: ${p.pt2 || 0}</span>
+          <span class="pt-pill">3p: ${p.pt3 || 0}</span>
+          <span class="pt-pill">TL: ${p.ftMade || 0}/${(p.ftMade||0)+(p.ftMissed||0)}</span>
+        </div>
+        <div class="player-pts">${pts}</div>
+        <div class="player-fouls ${foulClass}">${fouls}</div>
+      </div>
+    `;
+
+    if (p.onCourt) {
+      courtContainer.appendChild(row);
+      countCourt++;
+    } else {
+      benchContainer.appendChild(row);
+      countBench++;
+    }
+  });
+
+  // Gestione messaggi vuoti di cortesia
+  if (countCourt === 0) {
+    courtContainer.innerHTML = '<div class="empty-list-msg">Nessun giocatore attualmente in campo</div>';
+  }
+  if (countBench === 0) {
+    benchContainer.innerHTML = '<div class="empty-list-msg">Tutti i convocati sono in campo</div>';
+  }
+
+  document.getElementById('noDataView').style.display = 'none';
+  document.getElementById('mainView').style.display = 'block';
+}
+
+window.addEventListener('offline', () => updateFirebaseStatus(false));
+window.addEventListener('online', () => updateFirebaseStatus(true));
+</script>
+</body>
+</html>
