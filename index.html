@@ -7,7 +7,7 @@
   
   if (inserito !== pinCorretto) {
     alert("Accesso negato!");
-    window.location.href = "esordienti_live.html"; // Lo rispedisce alla partita pubblica
+    window.location.href = "partita_esordienti.html"; // Lo rispedisce alla partita pubblica
   }
 </script>
 <meta charset="UTF-8">
@@ -1387,7 +1387,7 @@ function save() {
 function totalPts(p) { return p.pt1 + p.pt2*2 + p.pt3*3; }
 
 function formatTime(s) {
-  s = Math.max(0, Math.round(s));
+  s = Math.max(0, Math.ceil(s));
   const m = Math.floor(s / 60);
   const sec = s % 60;
   return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
