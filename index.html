@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <script>
+  const pinCorretto = "1403"; // Scegli il tuo PIN numerico
+  const inserito = prompt("Inserisci il PIN per inserire i risultati:");
+  
+  if (inserito !== pinCorretto) {
+    alert("Accesso negato!");
+    window.location.href = "esordienti_live.html"; // Lo rispedisce alla partita pubblica
+  }
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🏀 Basketball Scoresheet - Esordienti</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6B00;
+    --orange-light: #FF8C35;
+    --orange-pale: #fff3e0;
+    --blue-dark: #003087;
+    --blue-mid: #1565C0;
+    --blue-light: #e3f2fd;
+    --dark: #0d1b2a;
+    --darker: #081422;
+    --surface: #132035;
+    --surface2: #1a2d47;
+    --text: #f0f4f8;
+    --text-dim: #8fa5bb;
+    --foul-red: #ef5350;
+    --green: #4caf50;
+    --white: #ffffff;
+    --radius: 10px;
+    --nav-height: 68px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--darker);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-bottom: var(--nav-height);
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, #001a5e 100%);
+    border-bottom: 3px solid var(--orange);
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0 6px;
+  }
+
+  .app-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .app-title span { color: var(--orange); }
+
+  .quarter-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .quarter-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .quarter-badge {
+    background: var(--orange);
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform .15s, background .15s;
+    user-select: none;
+  }
+  .quarter-badge:active { transform: scale(.9); }
+
+  .timer-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 4px 6px 4px 12px;
+    margin-left: 4px;
+  }
+
+  .timer-display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-bottom: 1px dashed rgba(255,255,255,0.3);
+    user-select: none;
+    min-width: 46px;
+    text-align: center;
+  }
+  .timer-display.timer-running { color: var(--green); border-bottom-color: transparent; }
+  .timer-display.timer-danger { color: var(--foul-red); }
+
+  .timer-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--green);
+    color: white;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform .12s, background .15s;
+    user-select: none;
+  }
+  .timer-btn:active { transform: scale(.88); }
+  .timer-btn.running { background: var(--foul-red); }
+
+  .scoreboard {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding-bottom: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .score-team {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 2px;
+  }
+
+  .score-team.home { background: rgba(255,107,0,0.15); border-left: 3px solid var(--orange); }
+  .score-team.away { background: rgba(21,101,192,0.15); border-right: 3px solid var(--blue-mid); }
+
+  .score-team-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .score-team.home .score-team-name { color: var(--orange-light); }
+  .score-team.away .score-team-name { color: #64b5f6; }
+
+  .score-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 44px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .score-sep {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text-dim);
+  }
+
+  .away-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .away-btn {
+    background: var(--blue-mid);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: transform .12s, filter .12s;
+    user-select: none;
+  }
+  .away-btn:active { transform: scale(.92); filter: brightness(1.2); }
+
+  .team-name-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed rgba(255,255,255,0.2);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: center;
+    width: 100%;
+    outline: none;
+    padding: 1px 2px;
+  }
+
+  .main {
+    padding: 12px 10px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .player-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: box-shadow .2s, border-color .3s, background .3s;
+  }
+
+  .player-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+
+  .player-card.highlight {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 2px rgba(255,107,0,0.4), 0 4px 20px rgba(255,107,0,0.2);
+    animation: cardFlash .8s ease-out forwards;
+  }
+
+  .player-card.on-court-card {
+    border-color: rgba(33, 150, 243, 0.4);
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.05) 0%, var(--surface) 100%);
+  }
+
+  @keyframes cardFlash {
+    0%   { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,107,0,0.6), 0 4px 24px rgba(255,107,0,0.35); }
+    60%  { border-color: var(--orange); box-shadow: 0 0 0 2px rgba(255,107,0,0.3), 0 4px 16px rgba(255,107,0,0.15); }
+    100% { border-color: rgba(255,255,255,0.05); box-shadow: none; }
+  }
+
+  .player-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--surface2);
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .player-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .player-name-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    flex: 1;
+    outline: none;
+    padding: 2px 4px;
+    transition: border-color .2s;
+    min-width: 60px;
+  }
+  .player-name-input:focus { border-color: var(--orange); }
+
+  .player-total-badge {
+    background: var(--orange);
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    min-width: 44px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform .2s;
+  }
+
+  .player-total-badge.pulse {
+    animation: pulse .3s ease-out;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); background: var(--orange-light); }
+    100% { transform: scale(1); }
+  }
+
+  .player-controls {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 10px 12px;
+    gap: 8px;
+  }
+
+  .pts-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .pt-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    padding: 8px 4px;
+  }
+
+  .pt-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .pt-count {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--white);
+    min-width: 32px;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .pt-btn-row {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-pt {
+    height: 48px;
+    flex: 1;
+    max-width: 64px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .1s, filter .1s;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .btn-pt:active { transform: scale(.9); filter: brightness(1.3); }
+
+  .btn-add { font-size: 22px; }
+  .btn-minus {
+    font-size: 20px;
+    background: rgba(255,255,255,0.07);
+    color: var(--text-dim);
+  }
+  .btn-minus:active { background: rgba(255,60,60,0.25); }
+
+  .btn-1 { background: #1976D2; color: white; }
+  .btn-2 { background: var(--orange); color: white; }
+  .btn-3 { background: #7B1FA2; color: white; }
+
+  .ft-section {
+    background: rgba(38,166,154,0.06);
+    border: 1px solid rgba(38,166,154,0.2);
+    border-radius: 10px;
+    padding: 8px;
+  }
+
+  .ft-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    padding: 0 2px;
+  }
+
+  .ft-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #4db6ac;
+    text-transform: uppercase;
+  }
+
+  .ft-attempted {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+  .ft-attempted b { color: var(--white); }
+
+  .btn-ft-award {
+    background: rgba(38,166,154,0.18);
+    color: #4db6ac;
+    border: 1px solid rgba(38,166,154,0.4);
+    border-radius: 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform .12s, filter .12s;
+  }
+  .btn-ft-award:active { transform: scale(.92); filter: brightness(1.3); }
+
+  .btn-ftmade { background: var(--green); color: white; }
+  .btn-ftmiss { background: var(--foul-red); color: white; }
+
+  .foul-row-outer {
+    display: flex;
+    align-items: center;
+    background: rgba(239,83,80,0.07);
+    border-radius: 10px;
+    padding: 8px 12px;
+    gap: 10px;
+    border: 1px solid rgba(239,83,80,0.15);
+  }
+
+  .foul-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--foul-red);
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  .foul-count {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--foul-red);
+    min-width: 32px;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .foul-count.danger { color: #ff1744; text-shadow: 0 0 10px rgba(255,23,68,0.6); }
+
+  .btn-foul {
+    width: 52px;
+    height: 48px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(239,83,80,0.18);
+    color: var(--foul-red);
+    font-size: 24px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .1s, background .12s;
+    font-family: 'Barlow Condensed', sans-serif;
+    user-select: none;
+    touch-action: manipulation;
+    flex-shrink: 0;
+  }
+  .btn-foul:active { transform: scale(.9); background: rgba(239,83,80,0.45); }
+  .btn-foul.minus {
+    font-size: 18px;
+    opacity: 0.55;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-dim);
+  }
+
+  .btn-presence {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    transition: transform .12s, opacity .15s;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .btn-presence:active { transform: scale(.92); }
+  .btn-presence.present {
+    background: rgba(76,175,80,0.2);
+    color: var(--green);
+    border: 1px solid rgba(76,175,80,0.4);
+  }
+  .btn-presence.absent {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .btn-oncourt {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    transition: transform .12s, opacity .15s;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .btn-oncourt:active { transform: scale(.92); }
+  .btn-oncourt.on-court {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196F3;
+    border: 1px solid rgba(33, 150, 243, 0.4);
+  }
+  .btn-oncourt.bench {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .player-inactive {
+    opacity: 0.45;
+  }
+  .player-inactive .player-header {
+    background: var(--darker);
+  }
+
+  .totals-bar {
+    background: linear-gradient(135deg, var(--blue-dark), #001a5e);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgba(255,107,0,0.3);
+    box-shadow: 0 0 24px rgba(255,107,0,0.1);
+  }
+
+  .totals-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .totals-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--orange);
+  }
+
+  .totals-fouls {
+    text-align: right;
+  }
+
+  .totals-fouls .totals-value {
+    color: var(--foul-red);
+    font-size: 28px;
+  }
+
+  .fab {
+    position: fixed;
+    bottom: calc(var(--nav-height) + 12px);
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    background: var(--orange);
+    border-radius: 50%;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255,107,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .2s, box-shadow .2s;
+    z-index: 200;
+  }
+  .fab:active { transform: scale(.92); }
+
+  .fab-left {
+    right: auto;
+    left: 20px;
+    background: var(--blue-mid);
+    box-shadow: 0 4px 20px rgba(21,101,192,0.5);
+  }
+
+  /* ─── VOCI DALLO STADIO ─── */
+  .voice-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .voice-card.becero { border-left: 3px solid #d32f2f; }
+  .voice-card.giornalista { border-left: 3px solid #1565C0; }
+  .voice-card.sfegatato { border-left: 3px solid var(--orange); }
+
+  .voice-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .voice-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.25);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .voice-icon svg { width: 100%; height: 100%; }
+
+  .voice-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    color: var(--white);
+  }
+  .voice-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .voice-textarea {
+    width: 100%;
+    min-height: 70px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    padding: 10px;
+    resize: vertical;
+    outline: none;
+  }
+  .voice-textarea:focus { border-color: var(--orange); }
+
+  .emoji-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+  }
+
+  .emoji-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    font-size: 17px;
+    padding: 4px 8px;
+    cursor: pointer;
+    line-height: 1.2;
+  }
+  .emoji-btn:active { transform: scale(.9); }
+
+  .voice-send-btn {
+    width: 100%;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .voice-send-btn:active { transform: scale(.97); }
+  .voice-send-btn:disabled { opacity: .6; }
+
+  .voice-lastsent {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .player-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height);
+    background: linear-gradient(180deg, rgba(8,20,34,0.0) 0%, rgba(8,20,34,1) 18%);
+    z-index: 150;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 10px;
+  }
+
+  .player-nav-inner {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px 0;
+  }
+  .player-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-chip {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    min-width: 46px;
+    height: 46px;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    transition: transform .12s, background .15s, border-color .15s;
+    position: relative;
+  }
+  .nav-chip:active { transform: scale(.88); }
+
+  .nav-chip.active-chip {
+    background: rgba(255,107,0,0.18);
+    border-color: var(--orange);
+  }
+
+  .nav-chip.on-court-chip {
+    border-color: #2196F3;
+    background: rgba(33, 150, 243, 0.12);
+  }
+
+  .nav-chip-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .nav-chip-foul {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--foul-red);
+    border: 2px solid var(--darker);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .nav-chip-foul.hidden { display: none; }
+
+  .nav-chip-pts {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-dim);
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .nav-chip-pts.has-pts { color: var(--orange-light); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 300;
+    align-items: flex-end;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--dark);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px 16px 32px;
+    border-top: 3px solid var(--orange);
+    animation: slideUp .3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .stats-view-container {
+    display: none;
+    padding: 16px 10px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+    animation: fadeIn .3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stats-card {
+    background: var(--dark);
+    border-radius: var(--radius);
+    padding: 20px 16px 32px;
+    border-top: 3px solid var(--orange);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stats-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+  }
+
+  .stats-table th {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    padding: 6px 8px;
+    text-align: center;
+  }
+  .stats-table th:first-child { text-align: left; }
+
+  .stats-table td {
+    background: var(--surface);
+    padding: 10px 8px;
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .stats-table td:first-child {
+    text-align: left;
+    padding-left: 12px;
+    border-radius: 8px 0 0 8px;
+    font-size: 14px;
+  }
+  .stats-table td:last-child { border-radius: 0 8px 8px 0; }
+
+  .stats-table tr td.total-cell {
+    background: var(--orange);
+    font-size: 17px;
+    font-weight: 900;
+  }
+
+  .stats-table tr td.foul-cell { color: var(--foul-red); }
+
+  .stats-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .score-final { display: flex; align-items: center; gap: 12px; }
+  .score-final-team { text-align: center; }
+
+  .score-final-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .score-final-pts {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .score-final-pts.home { color: var(--orange); }
+  .score-final-pts.away { color: #64b5f6; }
+  .score-final-sep { font-family: 'Barlow Condensed',sans-serif; font-size: 28px; color: var(--text-dim); }
+
+  .q-boxes-wrapper {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    min-width: 140px;
+  }
+
+  .q-box {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .q-box-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .q-box-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1;
+    margin-top: 3px;
+  }
+
+  .q-box-h { color: var(--orange); }
+  .q-box-a { color: #64b5f6; }
+  .q-box-sep { color: var(--text-dim); font-size: 11px; font-weight: 400; }
+
+  .btn-close-modal {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: var(--text-dim);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .btn-reset {
+    background: rgba(239,83,80,0.1);
+    border: 1px solid rgba(239,83,80,0.3);
+    color: var(--foul-red);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 12px;
+    width: 100%;
+  }
+
+  .firebase-status {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #4caf50;
+    box-shadow: 0 0 8px rgba(76,175,80,0.6);
+    z-index: 999;
+  }
+
+  .firebase-status.offline {
+    background: #ff9800;
+    animation: blink-offline 0.5s infinite;
+  }
+
+  @keyframes blink-offline {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<div class="firebase-status" id="firebaseStatus"></div>
+
+<div id="appView">
+  <header>
+    <div class="header-top">
+      <div class="app-title">🏀 SCORE<span>SHEET</span></div>
+      <div class="quarter-controls">
+        <span class="quarter-label">QUARTO</span>
+        <div class="quarter-badge" id="quarterBadge" onclick="nextQuarter()">1</div>
+        <div class="timer-box">
+          <span class="timer-display" id="timerDisplay" onclick="editTimer()" title="Tocca per modificare il tempo">08:00</span>
+          <button class="timer-btn" id="timerToggleBtn" onclick="toggleTimer()" title="Avvia/Ferma">▶</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="score-team home">
+        <input class="team-name-input" id="homeName" value="PONTE DI NONA" maxlength="16">
+        <div class="score-value" id="homeScore">0</div>
+      </div>
+      <div class="score-sep">—</div>
+      <div class="score-team away">
+        <input class="team-name-input" id="awayName" value="AVVERSARIO" maxlength="16" oninput="syncAwayName()">
+        <div class="score-value" id="awayScore">0</div>
+        <div class="away-input-row">
+          <button class="away-btn" onclick="addAway(1)">+1</button>
+          <button class="away-btn" onclick="addAway(2)">+2</button>
+          <button class="away-btn" onclick="addAway(3)">+3</button>
+          <button class="away-btn" style="background:rgba(255,255,255,0.1);color:#8fa5bb" onclick="addAway(-1)">−</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main" id="playerList"></div>
+
+  <div class="main" style="padding-top: 0;">
+    <div class="totals-bar" style="margin-top: 0;">
+      <div>
+        <div class="totals-label">Totale Punti</div>
+        <div class="totals-value" id="totalPts">0</div>
+      </div>
+      <div style="text-align: center;">
+        <div class="totals-label">In Campo</div>
+        <div class="totals-value" id="onCourtCount" style="color: #2196F3;">0/5</div>
+      </div>
+      <div class="totals-fouls">
+        <div class="totals-label">Falli Totali</div>
+        <div class="totals-value" id="totalFouls">0</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" onclick="openStats()" title="Statistiche">📊</button>
+  <button class="fab fab-left" onclick="openVoices()" title="Voci dallo stadio">🗣️</button>
+
+  <div class="modal-overlay" id="voicesModal">
+    <div class="modal" style="border-top-color: var(--blue-mid);">
+      <div class="modal-title" style="margin-bottom:16px;">🗣️ Voci dallo Stadio</div>
+
+      <div class="voice-card becero">
+        <div class="voice-header">
+          <div class="voice-icon" id="icon-becero"></div>
+          <div>
+            <div class="voice-name">Il Tifoso Becero</div>
+            <div class="voice-sub">Fumetto rosso</div>
+          </div>
+        </div>
+        <textarea class="voice-textarea" id="voice-input-becero" placeholder="Cosa urla il tifoso becero? 🤬"></textarea>
+        <div class="emoji-row" id="emoji-becero"></div>
+        <button class="voice-send-btn" id="voice-send-becero" onclick="sendComment('becero')">📢 Invia al Tabellone</button>
+        <div class="voice-lastsent" id="lastsent-becero"></div>
+      </div>
+
+      <div class="voice-card giornalista">
+        <div class="voice-header">
+          <div class="voice-icon" id="icon-giornalista"></div>
+          <div>
+            <div class="voice-name">Il Giornalista Obiettivo</div>
+            <div class="voice-sub">Fumetto blu</div>
+          </div>
+        </div>
+        <textarea class="voice-textarea" id="voice-input-giornalista" placeholder="Il commento imparziale del giornalista... 🎙️"></textarea>
+        <div class="emoji-row" id="emoji-giornalista"></div>
+        <button class="voice-send-btn" id="voice-send-giornalista" onclick="sendComment('giornalista')" style="background:var(--blue-mid);">📢 Invia al Tabellone</button>
+        <div class="voice-lastsent" id="lastsent-giornalista"></div>
+      </div>
+
+      <div class="voice-card sfegatato">
+        <div class="voice-header">
+          <div class="voice-icon" id="icon-sfegatato"></div>
+          <div>
+            <div class="voice-name">Il Tifoso Sfegatato</div>
+            <div class="voice-sub">Fumetto arancio</div>
+          </div>
+        </div>
+        <textarea class="voice-textarea" id="voice-input-sfegatato" placeholder="Il grido di battaglia del super tifoso! 🔥"></textarea>
+        <div class="emoji-row" id="emoji-sfegatato"></div>
+        <button class="voice-send-btn" id="voice-send-sfegatato" onclick="sendComment('sfegatato')">📢 Invia al Tabellone</button>
+        <div class="voice-lastsent" id="lastsent-sfegatato"></div>
+      </div>
+
+      <button class="btn-close-modal" style="width:100%; margin-top:6px;" onclick="closeVoices()">Chiudi</button>
+    </div>
+  </div>
+
+  <nav class="player-nav" id="playerNav">
+    <div class="player-nav-inner" id="playerNavInner"></div>
+  </nav>
+
+  <div class="modal-overlay" id="quarterModal">
+    <div class="modal" style="border-top-color: var(--blue-mid); max-height: unset; padding: 24px 20px 28px;">
+      <div class="modal-title" style="color:var(--orange); margin-bottom:10px;">&#9201; Fine Quarto <span id="qModalNum">1</span></div>
+      <div style="font-size:14px; color:var(--text-dim); margin-bottom:18px; line-height:1.5;">
+        Vuoi storicizzare il punteggio di questo quarto prima di passare al prossimo?
+      </div>
+      <div style="display:flex; gap:12px; justify-content:center; margin-bottom:8px;">
+        <div style="text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; color:var(--orange-light); text-transform:uppercase; margin-bottom:4px;" id="qModalHomeLbl">CASA</div>
+          <div style="font-family:'Barlow Condensed',sans-serif; font-size:40px; font-weight:900; color:var(--orange); line-height:1;" id="qModalHomeScore">0</div>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:300; color:var(--text-dim); display:flex; align-items:center;">&#8212;</div>
+        <div style="text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; color:#64b5f6; text-transform:uppercase; margin-bottom:4px;" id="qModalAwayLbl">AVV</div>
+          <div style="font-family:'Barlow Condensed',sans-serif; font-size:40px; font-weight:900; color:#64b5f6; line-height:1;" id="qModalAwayScore">0</div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:18px;">
+        <div style="display:flex; gap:10px;">
+          <button onclick="confirmQuarter(true)" style="flex:1; background:var(--orange); color:white; border:none; border-radius:10px; padding:14px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer; text-transform:uppercase;">&#10003; S&igrave;, storicizza</button>
+          <button onclick="confirmQuarter(false)" style="flex:1; background:rgba(255,255,255,0.07); color:var(--text-dim); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; cursor:pointer; text-transform:uppercase;">&#10007; Salta</button>
+        </div>
+        <button onclick="cancelQuarterModal()" style="background:transparent; color:var(--text-dim); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:12px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; letter-spacing:1px; cursor:pointer; text-transform:uppercase;">&#8617; Indietro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="statsView" class="stats-view-container">
+  <div class="stats-card">
+    <div class="modal-title">📊 RIEPILOGO PARTITA</div>
+    
+    <div style="width:100%; overflow-x:auto;">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Giocatore</th>
+            <th>1PT</th>
+            <th>2PT</th>
+            <th>3PT</th>
+            <th>TL</th>
+            <th>TOT</th>
+            <th>F</th>
+          </tr>
+        </thead>
+        <tbody id="statsBody"></tbody>
+      </table>
+    </div>
+    
+    <div class="stats-footer">
+      <div class="score-final">
+        <div class="score-final-team">
+          <div class="score-final-name" id="statHomeName">CASA</div>
+          <div class="score-final-pts home" id="statHomeScore">0</div>
+        </div>
+        <div class="score-final-sep">—</div>
+        <div class="score-final-team">
+          <div class="score-final-name" id="statAwayName">AVV</div>
+          <div class="score-final-pts away" id="statAwayScore">0</div>
+        </div>
+      </div>
+      <div id="qBoxesContainer" class="q-boxes-wrapper"></div>
+      <button class="btn-close-modal" onclick="closeStats()">Chiudi</button>
+    </div>
+    
+    <button class="btn-reset" onclick="confirmReset()">🔄 Azzera Partita</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAtkWH5ekxU7YK-LvXLR0hhb-cyrFmxc34",
+  authDomain: "basket-scoresheet.firebaseapp.com",
+  projectId: "basket-scoresheet",
+  storageBucket: "basket-scoresheet.firebasestorage.app",
+  messagingSenderId: "239574167542",
+  appId: "1:239574167542:web:abcd8f2a2d62fa132061d7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+window.doc = doc;
+window.setDoc = setDoc;
+window.firebaseReady = true;
+
+async function saveToFirebase() {
+  try {
+    const homeName = document.getElementById('homeName').value || 'PONTE DI NONA';
+    const awayName = document.getElementById('awayName').value || 'AVVERSARIO';
+    
+    const homeScoreNum = players.reduce((sum, p) => {
+      return sum + ((p.pt1 || 0) * 1 + (p.pt2 || 0) * 2 + (p.pt3 || 0) * 3);
+    }, 0);
+
+    const docRef = doc(db, "matches", "current");
+    await setDoc(docRef, {
+      homeTeam: homeName,
+      awayTeam: awayName,
+      homeScore: homeScoreNum,
+      awayScore: awayScore || 0,
+      quarter: quarter || 1,
+      players: players || [],
+      quarterHistory: quarterHistory || [],
+      quarterStartHome: quarterStartHome || 0,
+      quarterStartAway: quarterStartAway || 0,
+      timerSeconds: (typeof timerSeconds !== 'undefined') ? timerSeconds : 480,
+      timerRunning: (typeof timerRunning !== 'undefined') ? timerRunning : false,
+      timerEndAt: (typeof timerEndAt !== 'undefined') ? timerEndAt : null,
+      ftEvent: window.ftEvent || null,
+      comments: (typeof comments !== 'undefined') ? comments : {},
+      updatedAt: new Date()
+    }, { merge: true });
+    
+    document.getElementById('firebaseStatus').classList.remove('offline');
+    console.log('Salvato su Firestore con successo');
+  } catch (e) {
+    console.error('Errore Firestore:', e);
+    document.getElementById('firebaseStatus').classList.add('offline');
+  }
+}
+
+window.saveToFirebase = saveToFirebase;
+</script>
+
+<script>
+const PLAYER_COUNT = 18;
+let awayScore = 0;
+let quarter = 1;
+let quarterHistory = [];
+let quarterStartHome = 0;
+let quarterStartAway = 0;
+let lastScorerAction = JSON.parse(localStorage.getItem('bball_last_scorer') || 'null');
+window.lastScorerAction = lastScorerAction;
+
+const TIMER_DEFAULT_SECONDS = 480;
+let timerSeconds = parseFloat(localStorage.getItem('bball_timer_seconds'));
+if (isNaN(timerSeconds)) timerSeconds = TIMER_DEFAULT_SECONDS;
+let timerRunning = localStorage.getItem('bball_timer_running') === '1';
+let timerEndAt = parseInt(localStorage.getItem('bball_timer_endat') || '');
+if (isNaN(timerEndAt)) timerEndAt = null;
+if (timerRunning && !timerEndAt) timerRunning = false;
+
+const DEFAULT_PLAYERS = [
+  { name: '2 - LEONARDO',    pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '5 - FLAVIO',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '6 - RAZVAN',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '7 - GIOELE',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '10 - LUCA',       pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '14 - MATTEO M.',  pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '20 - LORENZO A.', pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '22 - TOMMASO',    pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '33 - ADRIANO',    pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '37 - CHRISTIAN',  pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '38 - YANNIS',     pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '48 - EDOARDO P.', pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '73 - LUIGI',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '77 - MATTEO L.',  pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '81 - LORENZO L.', pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '86 - GIULIO',     pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '82 - DAVID',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '?? - EDOARDO ?',  pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+];
+
+let players = JSON.parse(localStorage.getItem('bball_players') || 'null') || DEFAULT_PLAYERS.map(p => ({...p}));
+players = players.map(p => ({ active: true, onCourt: false, ftMade: 0, ftMissed: 0, ...p }));
+
+awayScore = parseInt(localStorage.getItem('bball_away') || '0');
+quarter = parseInt(localStorage.getItem('bball_quarter') || '1');
+quarterHistory = JSON.parse(localStorage.getItem('bball_qhistory') || '[]');
+quarterStartHome = parseInt(localStorage.getItem('bball_qstart_home') || '0');
+quarterStartAway = parseInt(localStorage.getItem('bball_qstart_away') || '0');
+
+function save() {
+  localStorage.setItem('bball_players', JSON.stringify(players));
+  localStorage.setItem('bball_away', awayScore);
+  localStorage.setItem('bball_quarter', quarter);
+  localStorage.setItem('bball_qhistory', JSON.stringify(quarterHistory));
+  localStorage.setItem('bball_qstart_home', quarterStartHome);
+  localStorage.setItem('bball_qstart_away', quarterStartAway);
+  localStorage.setItem('bball_lastaction', JSON.stringify(window.lastAction));
+  
+  if (window.firebaseReady) {
+    saveToFirebase();
+  }
+}
+
+function totalPts(p) { return p.pt1 + p.pt2*2 + p.pt3*3; }
+
+function formatTime(s) {
+  s = Math.max(0, Math.round(s));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+
+function getCurrentTimerSeconds() {
+  if (timerRunning && timerEndAt) {
+    return Math.max(0, (timerEndAt - Date.now()) / 1000);
+  }
+  return timerSeconds;
+}
+
+function renderTimer() {
+  const remaining = getCurrentTimerSeconds();
+  const display = document.getElementById('timerDisplay');
+  const btn = document.getElementById('timerToggleBtn');
+  if (!display || !btn) return;
+  display.textContent = formatTime(remaining);
+  display.classList.toggle('timer-running', timerRunning);
+  display.classList.toggle('timer-danger', remaining <= 60 && remaining > 0);
+  btn.textContent = timerRunning ? '⏸' : '▶';
+  btn.classList.toggle('running', timerRunning);
+}
+
+function saveTimer() {
+  localStorage.setItem('bball_timer_seconds', timerSeconds);
+  localStorage.setItem('bball_timer_running', timerRunning ? '1' : '0');
+  localStorage.setItem('bball_timer_endat', timerEndAt || '');
+  save();
+}
+
+function toggleTimer() {
+  if (timerRunning) {
+    timerSeconds = getCurrentTimerSeconds();
+    timerRunning = false;
+    timerEndAt = null;
+  } else {
+    timerEndAt = Date.now() + timerSeconds * 1000;
+    timerRunning = true;
+  }
+  saveTimer();
+  renderTimer();
+}
+
+function editTimer() {
+  if (timerRunning) {
+    timerSeconds = getCurrentTimerSeconds();
+    timerRunning = false;
+    timerEndAt = null;
+  }
+  const input = prompt('Modifica tempo del quarto (MM:SS):', formatTime(timerSeconds));
+  if (input !== null) {
+    const parts = input.trim().split(':').map(x => parseInt(x, 10));
+    let secs = NaN;
+    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) secs = parts[0] * 60 + parts[1];
+    else if (parts.length === 1 && !isNaN(parts[0])) secs = parts[0] * 60;
+    if (!isNaN(secs) && secs >= 0) timerSeconds = secs;
+  }
+  saveTimer();
+  renderTimer();
+}
+
+function resetTimerForNewQuarter() {
+  timerSeconds = TIMER_DEFAULT_SECONDS;
+  timerRunning = false;
+  timerEndAt = null;
+  saveTimer();
+  renderTimer();
+}
+
+setInterval(() => {
+  if (timerRunning) {
+    const remaining = getCurrentTimerSeconds();
+    if (remaining <= 0) {
+      timerSeconds = 0;
+      timerRunning = false;
+      timerEndAt = null;
+      saveTimer();
+    }
+  }
+  renderTimer();
+}, 250);
+
+function extractJerseyNumber(name) {
+  const match = name.match(/^(\d+)\s*[-–]?\s*/);
+  if (match) {
+    return String(parseInt(match[1], 10));
+  }
+  return '?';
+}
+
+function renderNav() {
+  const inner = document.getElementById('playerNavInner');
+  inner.innerHTML = '';
+
+  players.forEach((p, i) => {
+    if (!p.active) return;
+
+    const jerseyNum = extractJerseyNumber(p.name);
+    const pts = totalPts(p);
+    const hasFouls = p.fouls > 0;
+
+    const chip = document.createElement('button');
+    chip.className = 'nav-chip' + (p.onCourt ? ' on-court-chip' : '');
+    chip.setAttribute('data-player-idx', i);
+    chip.setAttribute('aria-label', `Vai a ${p.name}`);
+    chip.innerHTML = `
+      ${hasFouls ? `<span class="nav-chip-foul">${p.fouls}</span>` : `<span class="nav-chip-foul hidden"></span>`}
+      <span class="nav-chip-num">${jerseyNum}</span>
+      <span class="nav-chip-pts ${pts > 0 ? 'has-pts' : ''}">${pts > 0 ? pts+'pt' : '·'}</span>
+    `;
+    chip.addEventListener('click', () => scrollToPlayer(i));
+    inner.appendChild(chip);
+  });
+}
+
+function scrollToPlayer(idx) {
+  const card = document.getElementById(`player-card-${idx}`);
+  if (!card) return;
+
+  const headerH = document.querySelector('header').offsetHeight;
+  const cardTop = card.getBoundingClientRect().top + window.scrollY;
+  const targetY = cardTop - headerH - 10;
+
+  window.scrollTo({ top: targetY, behavior: 'smooth' });
+
+  card.classList.remove('highlight');
+  void card.offsetWidth;
+  card.classList.add('highlight');
+  setTimeout(() => card.classList.remove('highlight'), 900);
+}
+
+function render() {
+  const list = document.getElementById('playerList');
+  list.innerHTML = '';
+
+  const sorted = players.map((p, i) => ({ p, i }))
+    .sort((a, b) => (b.p.active ? 1 : 0) - (a.p.active ? 1 : 0));
+
+  sorted.forEach(({ p, i }) => {
+    const tot = totalPts(p);
+    const foulDanger = p.fouls >= 5;
+    const card = document.createElement('div');
+    card.className = 'player-card' + (p.active ? '' : ' player-inactive') + (p.active && p.onCourt ? ' on-court-card' : '');
+    card.id = `player-card-${i}`;
+    card.innerHTML = `
+      <div class="player-header">
+        <span class="player-num">${i+1}</span>
+        <input class="player-name-input" value="${p.name}" 
+          onchange="players[${i}].name=this.value; save(); renderNav();" 
+          oninput="players[${i}].name=this.value; save(); renderNav();">
+        <button class="btn-presence ${p.active ? 'present' : 'absent'}" onclick="toggleActive(${i})" title="${p.active ? 'Presente' : 'Assente'}">
+          ${p.active ? '✓ Pres' : '✗ Ass'}
+        </button>
+        ${p.active ? `
+        <button class="btn-oncourt ${p.onCourt ? 'on-court' : 'bench'}" onclick="toggleOnCourt(${i})" title="${p.onCourt ? 'In campo' : 'In panchina'}">
+          ${p.onCourt ? '🏃 Campo' : '🪑 Panch'}
+        </button>
+        ` : ''}
+        <div class="player-total-badge" id="badge-${i}">${tot}</div>
+      </div>
+      ${p.active ? `
+      <div class="player-controls">
+        <div class="pts-row">
+          <div class="pt-group">
+            <div class="pt-label">1 punto</div>
+            <span class="pt-count" id="c1-${i}">${p.pt1}</span>
+            <div class="pt-btn-row">
+              <button class="btn-pt btn-minus" onclick="addPt(${i},1,-1)">−</button>
+              <button class="btn-pt btn-1 btn-add" onclick="addPt(${i},1,1)">+1</button>
+            </div>
+          </div>
+          <div class="pt-group">
+            <div class="pt-label">2 punti</div>
+            <span class="pt-count" id="c2-${i}">${p.pt2}</span>
+            <div class="pt-btn-row">
+              <button class="btn-pt btn-minus" onclick="addPt(${i},2,-1)">−</button>
+              <button class="btn-pt btn-2 btn-add" onclick="addPt(${i},2,1)">+2</button>
+            </div>
+          </div>
+          <div class="pt-group">
+            <div class="pt-label">3 punti</div>
+            <span class="pt-count" id="c3-${i}">${p.pt3}</span>
+            <div class="pt-btn-row">
+              <button class="btn-pt btn-minus" onclick="addPt(${i},3,-1)">−</button>
+              <button class="btn-pt btn-3 btn-add" onclick="addPt(${i},3,1)">+3</button>
+            </div>
+          </div>
+        </div>
+        <div class="ft-section">
+          <div class="ft-header">
+            <span class="ft-title">🎯 Tiri Liberi</span>
+            <button class="btn-ft-award" onclick="ftAward(${i})">Assegnati</button>
+          </div>
+          <div class="pts-row">
+            <div class="pt-group">
+              <div class="pt-label">Segnato</div>
+              <span class="pt-count" id="ftm-${i}">${p.ftMade || 0}</span>
+              <div class="pt-btn-row">
+                <button class="btn-pt btn-minus" onclick="addFt(${i},'made',-1)">−</button>
+                <button class="btn-pt btn-ftmade btn-add" onclick="addFt(${i},'made',1)">✓</button>
+              </div>
+            </div>
+            <div class="pt-group">
+              <div class="pt-label">Sbagliato</div>
+              <span class="pt-count" id="ftx-${i}">${p.ftMissed || 0}</span>
+              <div class="pt-btn-row">
+                <button class="btn-pt btn-minus" onclick="addFt(${i},'missed',-1)">−</button>
+                <button class="btn-pt btn-ftmiss btn-add" onclick="addFt(${i},'missed',1)">✗</button>
+              </div>
+            </div>
+          </div>
+          <div class="ft-attempted">Tirati: <b id="fta-${i}">${(p.ftMade||0)+(p.ftMissed||0)}</b></div>
+        </div>
+        <div class="foul-row-outer">
+          <div class="foul-label">⚠ Falli</div>
+          <button class="btn-foul minus" onclick="addFoul(${i},-1)">−</button>
+          <span class="foul-count${foulDanger?' danger':''}" id="f-${i}">${p.fouls}</span>
+          <button class="btn-foul" onclick="addFoul(${i},1)">+</button>
+        </div>
+      </div>
+      ` : ''}
+    `;
+    list.appendChild(card);
+  });
+
+  updateTotals();
+  renderNav();
+}
+
+function toggleActive(idx) {
+  players[idx].active = !players[idx].active;
+  if (!players[idx].active) {
+    players[idx].onCourt = false;
+  }
+  render();
+  save();
+}
+
+function toggleOnCourt(idx) {
+  if (!players[idx].active) return;
+  
+  if (!players[idx].onCourt) {
+    const onCourtCount = players.filter(p => p.active && p.onCourt).length;
+    if (onCourtCount >= 5) {
+      alert("Ci possono essere al massimo 5 giocatori in campo contemporaneamente!");
+      return;
+    }
+  }
+  
+  players[idx].onCourt = !players[idx].onCourt;
+  render();
+  save();
+}
+
+function addPt(idx, type, delta) {
+  if (type === 1) players[idx].pt1 = Math.max(0, players[idx].pt1 + delta);
+  if (type === 2) players[idx].pt2 = Math.max(0, players[idx].pt2 + delta);
+  if (type === 3) players[idx].pt3 = Math.max(0, players[idx].pt3 + delta);
+  
+  if (delta > 0) {
+    window.lastAction = {
+      team: 'home',
+      name: players[idx].name,
+      text: '+' + type
+    };
+  }
+  
+  save();
+
+  document.getElementById(`c1-${idx}`).textContent = players[idx].pt1;
+  document.getElementById(`c2-${idx}`).textContent = players[idx].pt2;
+  document.getElementById(`c3-${idx}`).textContent = players[idx].pt3;
+
+  const tot = totalPts(players[idx]);
+  const badge = document.getElementById(`badge-${idx}`);
+  badge.textContent = tot;
+  badge.classList.remove('pulse');
+  void badge.offsetWidth;
+  badge.classList.add('pulse');
+
+  updateTotals();
+  renderNav();
+}
+function ftAward(idx) {
+  window.ftEvent = {
+    team: 'home',
+    kind: 'award',
+    name: players[idx].name,
+    text: 'Tiri liberi assegnati',
+    ts: Date.now()
+  };
+  const card = document.getElementById(`player-card-${idx}`);
+  if (card) {
+    card.classList.remove('highlight');
+    void card.offsetWidth;
+    card.classList.add('highlight');
+    setTimeout(() => card.classList.remove('highlight'), 900);
+  }
+  save();
+}
+
+function addFt(idx, kind, delta) {
+  if (kind === 'made') {
+    // Un libero segnato vale 1 punto: sincronizziamo anche il contatore "1 punto"
+    players[idx].ftMade = Math.max(0, (players[idx].ftMade || 0) + delta);
+    players[idx].pt1 = Math.max(0, players[idx].pt1 + delta);
+    document.getElementById(`c1-${idx}`).textContent = players[idx].pt1;
+
+    if (delta > 0) {
+      window.ftEvent = {
+        team: 'home',
+        kind: 'made',
+        name: players[idx].name,
+        text: 'Tiro libero segnato',
+        ts: Date.now()
+      };
+    }
+  } else {
+    players[idx].ftMissed = Math.max(0, (players[idx].ftMissed || 0) + delta);
+
+    if (delta > 0) {
+      window.ftEvent = {
+        team: 'home',
+        kind: 'miss',
+        name: players[idx].name,
+        text: 'Tiro libero sbagliato',
+        ts: Date.now()
+      };
+    }
+  }
+
+  document.getElementById(`ftm-${idx}`).textContent = players[idx].ftMade || 0;
+  document.getElementById(`ftx-${idx}`).textContent = players[idx].ftMissed || 0;
+  document.getElementById(`fta-${idx}`).textContent = (players[idx].ftMade || 0) + (players[idx].ftMissed || 0);
+
+  const tot = totalPts(players[idx]);
+  const badge = document.getElementById(`badge-${idx}`);
+  badge.textContent = tot;
+  badge.classList.remove('pulse');
+  void badge.offsetWidth;
+  badge.classList.add('pulse');
+
+  updateTotals();
+  renderNav();
+  save();
+}
+
+function addFoul(idx, delta) {
+  players[idx].fouls = Math.max(0, players[idx].fouls + delta);
+  const el = document.getElementById(`f-${idx}`);
+  el.textContent = players[idx].fouls;
+  el.className = 'foul-count' + (players[idx].fouls >= 5 ? ' danger' : '');
+  updateTotals();
+  renderNav();
+  save();
+}
+
+function addAway(delta) {
+  awayScore = Math.max(0, awayScore + delta);
+  
+  if (delta > 0) {
+    window.lastAction = {
+      team: 'away',
+      name: document.getElementById('awayName').value || 'AVVERSARIO',
+      text: '+' + delta
+    };
+  }
+  
+  save();
+  document.getElementById('awayScore').textContent = awayScore;
+}
+
+function updateTotals() {
+  let pts = 0, fouls = 0, onCourt = 0;
+  players.forEach(p => { 
+    if (p.active) { 
+      pts += totalPts(p); 
+      fouls += p.fouls; 
+      if (p.onCourt) onCourt++;
+    } 
+  });
+  document.getElementById('homeScore').textContent = pts;
+  document.getElementById('totalPts').textContent = pts;
+  document.getElementById('totalFouls').textContent = fouls;
+  document.getElementById('onCourtCount').textContent = onCourt + "/5";
+  document.getElementById('awayScore').textContent = awayScore;
+}
+
+function nextQuarter() {
+  const homeNow = parseInt(document.getElementById('homeScore').textContent) || 0;
+  document.getElementById('qModalNum').textContent = quarter;
+  document.getElementById('qModalHomeLbl').textContent = document.getElementById('homeName').value || 'CASA';
+  document.getElementById('qModalAwayLbl').textContent = document.getElementById('awayName').value || 'AVV';
+  document.getElementById('qModalHomeScore').textContent = homeNow;
+  document.getElementById('qModalAwayScore').textContent = awayScore;
+  document.getElementById('quarterModal').classList.add('open');
+}
+
+function cancelQuarterModal() {
+  // Chiude semplicemente il modale: nessuna azione, nessuna storicizzazione,
+  // nessun avanzamento di quarto. Serve a prevenire click accidentali.
+  document.getElementById('quarterModal').classList.remove('open');
+}
+
+function confirmQuarter(storicise) {
+  document.getElementById('quarterModal').classList.remove('open');
+  if (storicise) {
+    const homeTotal = parseInt(document.getElementById('homeScore').textContent) || 0;
+    const homeQ = homeTotal - quarterStartHome;
+    const awayQ = awayScore - quarterStartAway;
+    quarterHistory.push({ q: quarter, home: homeQ, away: awayQ });
+    quarterStartHome = homeTotal;
+    quarterStartAway = awayScore;
+  }
+  quarter = quarter >= 4 ? 1 : quarter + 1;
+  document.getElementById('quarterBadge').textContent = quarter;
+  resetTimerForNewQuarter();
+  save();
+}
+
+function syncAwayName() {
+  const name = document.getElementById('awayName').value;
+  localStorage.setItem('bball_awayname', name);
+  save();
+}
+
+function openStats() {
+  const body = document.getElementById('statsBody');
+  body.innerHTML = '';
+  let totalP = 0, totalF = 0;
+
+  players.forEach(p => {
+    if (!p.active) return;
+    const tot = totalPts(p);
+    if (tot === 0 && p.fouls === 0 && p.name.startsWith('Giocatore')) return;
+    totalP += tot; totalF += p.fouls;
+    const ftAttempted = (p.ftMade || 0) + (p.ftMissed || 0);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.pt1}</td>
+      <td>${p.pt2}</td>
+      <td>${p.pt3}</td>
+      <td>${p.ftMade || 0}/${ftAttempted}</td>
+      <td class="total-cell">${tot}</td>
+      <td class="foul-cell">${p.fouls}</td>
+    `;
+    body.appendChild(tr);
+  });
+
+  const tot_row = document.createElement('tr');
+  tot_row.innerHTML = `
+    <td style="font-weight:900;color:var(--orange)">TOTALE</td>
+    <td></td><td></td><td></td><td></td>
+    <td class="total-cell" style="font-size:20px">${totalP}</td>
+    <td class="foul-cell" style="font-size:18px;font-weight:900">${totalF}</td>
+  `;
+  body.appendChild(tot_row);
+
+  document.getElementById('statHomeName').textContent = document.getElementById('homeName').value;
+  document.getElementById('statAwayName').textContent = document.getElementById('awayName').value;
+  document.getElementById('statHomeScore').textContent = totalP;
+  document.getElementById('statAwayScore').textContent = awayScore;
+
+  const qContainer = document.getElementById('qBoxesContainer');
+  qContainer.innerHTML = '';
+  if (quarterHistory.length > 0) {
+    quarterHistory.forEach(entry => {
+      const box = document.createElement('div');
+      box.className = 'q-box';
+      box.innerHTML = `
+        <div class="q-box-label">Q${entry.q}</div>
+        <div class="q-box-row">
+          <span class="q-box-h">${entry.home}</span>
+          <span class="q-box-sep">-</span>
+          <span class="q-box-a">${entry.away}</span>
+        </div>
+      `;
+      qContainer.appendChild(box);
+    });
+  }
+
+  document.getElementById('appView').style.display = 'none';
+  document.getElementById('statsView').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function closeStats() {
+  document.getElementById('statsView').style.display = 'none';
+  document.getElementById('appView').style.display = 'block';
+}
+
+function confirmReset() {
+  if (confirm('Azzerare tutti i dati della partita?')) {
+    players = DEFAULT_PLAYERS.map(p => ({...p}));
+    awayScore = 0; quarter = 1;
+    quarterHistory = []; quarterStartHome = 0; quarterStartAway = 0;
+    window.lastAction = null;
+    window.ftEvent = null;
+
+    // Azzera anche le "Voci dallo stadio"
+    comments = {};
+    ['becero','giornalista','sfegatato'].forEach(function(k){
+      const ta = document.getElementById('voice-input-' + k);
+      if (ta) ta.value = '';
+      const ls = document.getElementById('lastsent-' + k);
+      if (ls) ls.textContent = '';
+    });
+
+    localStorage.clear();
+    document.getElementById('quarterBadge').textContent = 1;
+    timerSeconds = TIMER_DEFAULT_SECONDS;
+    timerRunning = false;
+    timerEndAt = null;
+    closeStats();
+    render();
+    renderTimer();
+    save();
+
+    // Forza la pulizia dei commenti anche su Firestore
+    if (window.firebaseReady && window.db && window.doc && window.setDoc) {
+      window.setDoc(window.doc(window.db, "matches", "current"), { comments: {} }, { merge: true });
+    }
+  }
+}
+
+render();
+document.getElementById('quarterBadge').textContent = quarter;
+renderTimer();
+const savedAwayName = localStorage.getItem('bball_awayname');
+if (savedAwayName) document.getElementById('awayName').value = savedAwayName;
+const savedHomeName = localStorage.getItem('bball_awayname_home');
+if (savedHomeName) document.getElementById('homeName').value = savedHomeName;
+document.getElementById('homeName').addEventListener('input', function() {
+  localStorage.setItem('bball_awayname_home', this.value);
+  save();
+});
+</script>
+
+<script>
+/* ─── VOCI DALLO STADIO: pixel art + invio commenti ─── */
+
+const PIXEL_GRIDS = {
+  becero: [
+    "......8888......",
+    "....88888888....",
+    "...8888888888...",
+    "..991111111199..",
+    ".11133322333111.",
+    ".11145111154111.",
+    "1991111111111991",
+    "1116666666666111",
+    "1117777777777111",
+    "111AAAAAAAAAA111",
+    ".11166666666111.",
+    ".11111111111111.",
+    "..212121212121..",
+    "...1111111111...",
+    "....11111111....",
+    "......1111......"
+  ],
+  giornalista: [
+    "......3333......",
+    "....33333333....",
+    "...3333333333...",
+    "..333111111333..",
+    ".11133111133111.",
+    ".11100000000111.",
+    "1104500000054011",
+    "1101111111111011",
+    "1111111661111111",
+    "1111111111111111",
+    ".11111111111111.",
+    ".11111111111111.",
+    "..111111111111..",
+    "...CCBBBBBBCC...",
+    "....BBBBBBBB....",
+    "......BBBB......"
+  ],
+  sfegatato: [
+    "......8899......",
+    "....88889999....",
+    "...8888899999...",
+    "..888888999999..",
+    ".88833889933999.",
+    ".88845889954999.",
+    "8888888899999999",
+    "8886666666666999",
+    "8887777777777999",
+    "888AAAAAAAAAA999",
+    ".88866666666999.",
+    ".88888889999999.",
+    "..888888999999..",
+    "...BBBBBBBBBB...",
+    "....CCCCCCCC....",
+    "......BBBB......"
+  ]
+};
+
+const PIXEL_PALETTES = {
+  becero: { '1':'#e8a978', '2':'#c9906a', '3':'#2b1a12', '4':'#ffffff', '5':'#1a1a1a', '6':'#7a1220', '7':'#fff8ec', '8':'#d32f2f', '9':'#a01f1f', 'A':'#ff4d4d' },
+  giornalista: { '1':'#e8a978', '3':'#3d2b1e', '0':'#263238', '4':'#ffffff', '5':'#1a1a1a', '6':'#37474f', 'C':'#ffffff', 'B':'#1565C0' },
+  sfegatato: { '1':'#e8a978', '8':'#FF6B00', '9':'#1565C0', '3':'#1a1a1a', '4':'#ffffff', '5':'#1a1a1a', '6':'#7a1220', '7':'#fff8ec', 'A':'#ff4d4d', 'B':'#ffffff', 'C':'#003087' }
+};
+
+function pixelArtSVG(grid, palette, ps) {
+  ps = ps || 6;
+  const rows = grid.length, cols = grid[0].length;
+  let rects = '';
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const ch = grid[y][x];
+      if (ch === '.' || !palette[ch]) continue;
+      rects += `<rect x="${x*ps}" y="${y*ps}" width="${ps}" height="${ps}" fill="${palette[ch]}"/>`;
+    }
+  }
+  return `<svg viewBox="0 0 ${cols*ps} ${rows*ps}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">${rects}</svg>`;
+}
+
+const VOICE_EMOJIS = {
+  becero: ['😡','🤬','💢','👎','😤','🤡','🥱','👊'],
+  giornalista: ['🎙️','📝','🤔','✅','📊','⚖️','👀','🗞️'],
+  sfegatato: ['🔥','😍','🎉','🙌','❤️','🏆','😱','💪']
+};
+
+let comments = JSON.parse(localStorage.getItem('bball_comments') || 'null') || {};
+
+function initVoices() {
+  ['becero','giornalista','sfegatato'].forEach(key => {
+    document.getElementById('icon-' + key).innerHTML = pixelArtSVG(PIXEL_GRIDS[key], PIXEL_PALETTES[key], 6);
+    const row = document.getElementById('emoji-' + key);
+    row.innerHTML = '';
+    VOICE_EMOJIS[key].forEach(em => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'emoji-btn';
+      btn.textContent = em;
+      btn.onclick = () => insertEmoji(key, em);
+      row.appendChild(btn);
+    });
+    if (comments[key] && comments[key].text) {
+      document.getElementById('voice-input-' + key).value = comments[key].text;
+      updateLastSentLabel(key);
+    }
+  });
+}
+
+function insertEmoji(key, emoji) {
+  const ta = document.getElementById('voice-input-' + key);
+  const start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+  const end = ta.selectionEnd != null ? ta.selectionEnd : ta.value.length;
+  const val = ta.value;
+  ta.value = val.slice(0, start) + emoji + val.slice(end);
+  const pos = start + emoji.length;
+  ta.focus();
+  ta.setSelectionRange(pos, pos);
+}
+
+function updateLastSentLabel(key) {
+  const el = document.getElementById('lastsent-' + key);
+  if (!el) return;
+  if (comments[key] && comments[key].ts) {
+    const d = new Date(comments[key].ts);
+    el.textContent = 'Ultimo invio: ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+  } else {
+    el.textContent = '';
+  }
+}
+
+async function sendComment(key) {
+  const ta = document.getElementById('voice-input-' + key);
+  const text = ta.value.trim();
+
+  // Un testo vuoto è ammesso: significa "pulisci questo fumetto".
+  // In tal caso il tabellone non mostrerà alcuna notifica pop-up,
+  // ma la scheda nel modale "voci dallo stadio" tornerà al placeholder.
+  comments[key] = { text: text, ts: Date.now() };
+  localStorage.setItem('bball_comments', JSON.stringify(comments));
+
+  const btn = document.getElementById('voice-send-' + key);
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = text ? '⏳ Invio...' : '🧹 Pulizia...';
+
+  try {
+    if (window.firebaseReady && window.db && window.doc && window.setDoc) {
+      await window.setDoc(window.doc(window.db, "matches", "current"), { comments: comments }, { merge: true });
+    }
+    btn.textContent = text ? '✅ Inviato!' : '✅ Pulito!';
+  } catch (e) {
+    console.error('Errore invio commento:', e);
+    btn.textContent = '⚠️ Errore invio';
+  }
+
+  updateLastSentLabel(key);
+  setTimeout(() => {
+    btn.textContent = original;
+    btn.disabled = false;
+  }, 1400);
+}
+
+function openVoices() {
+  initVoices();
+  document.getElementById('voicesModal').classList.add('open');
+}
+
+function closeVoices() {
+  document.getElementById('voicesModal').classList.remove('open');
+}
+</script>
+</body>
+</html>
