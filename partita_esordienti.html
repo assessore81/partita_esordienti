@@ -712,6 +712,132 @@
     margin-top: 4px;
   }
 
+  /* ─── STORICO NOTIFICHE ─── */
+  .history-fab {
+    position: fixed;
+    left: 18px;
+    bottom: 18px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--blue-mid);
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(21,101,192,0.5);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .history-fab:active { transform: scale(.92); }
+
+  .history-fab-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ef5350;
+    border: 2px solid var(--darker);
+    display: none;
+  }
+  .history-fab-dot.show { display: block; }
+
+  .history-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 300;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .history-modal-overlay.open { display: flex; }
+
+  .history-modal {
+    background: var(--dark);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px 16px 28px;
+    border-top: 3px solid var(--blue-mid);
+    animation: slideUpVoices .3s ease-out;
+  }
+
+  .history-modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 18px;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .history-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--text-dim);
+  }
+
+  .history-row.hist-home { border-left-color: var(--orange); }
+  .history-row.hist-away { border-left-color: #64b5f6; }
+  .history-row.hist-ft { border-left-color: #26A69A; }
+
+  .history-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    width: 26px;
+    text-align: center;
+  }
+
+  .history-text {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .history-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .btn-clear-history {
+    width: 100%;
+    background: rgba(239,83,80,0.1);
+    border: 1px solid rgba(239,83,80,0.3);
+    color: var(--foul-red);
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+
   /* ─── NO DATA ─── */
   .no-data {
     text-align: center;
@@ -859,6 +985,11 @@
   <span class="voices-fab-dot" id="voicesFabDot"></span>
 </button>
 
+<button class="history-fab" id="historyFab" onclick="openHistoryModal()" title="Storico notifiche">
+  📜
+  <span class="history-fab-dot" id="historyFabDot"></span>
+</button>
+
 <div class="voices-modal-overlay" id="voicesModalOverlay">
   <div class="voices-modal">
     <div class="voices-modal-title">🗣️ Voci dallo Stadio</div>
@@ -889,6 +1020,15 @@
   </div>
 </div>
 
+<div class="history-modal-overlay" id="historyModalOverlay">
+  <div class="history-modal">
+    <div class="history-modal-title">📜 Storico Notifiche</div>
+    <div class="history-list" id="historyList"></div>
+    <button class="btn-clear-history" onclick="clearNotificationHistory()">🗑️ Svuota storico</button>
+    <button class="btn-close-voices" onclick="closeHistoryModal()">Chiudi</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -912,6 +1052,16 @@ let prevHomeScore = null;
 let prevAwayScore = null;
 let prevPlayersState = null;
 let currentNotification = JSON.parse(localStorage.getItem('live_last_notification') || 'null');
+let notificationHistory = JSON.parse(localStorage.getItem('live_notification_history') || '[]');
+
+function addToHistory(entry) {
+  const withTs = Object.assign({ ts: Date.now() }, entry);
+  notificationHistory.unshift(withTs);
+  if (notificationHistory.length > 200) notificationHistory = notificationHistory.slice(0, 200);
+  localStorage.setItem('live_notification_history', JSON.stringify(notificationHistory));
+  const dot = document.getElementById('historyFabDot');
+  if (dot && !historyModalOpen) dot.classList.add('show');
+}
 
 /* ─── VOCI DALLO STADIO: pixel art + fumetti ─── */
 const PIXEL_GRIDS = {
@@ -1008,6 +1158,7 @@ const VOICE_LABELS = {
 let prevCommentTs = { becero: null, giornalista: null, sfegatato: null };
 let voiceBannerTimeout = null;
 let voicesModalOpen = false;
+let historyModalOpen = false;
 
 function showVoiceBanner(key, text) {
   const banner = document.getElementById('voiceEventBanner');
@@ -1086,6 +1237,65 @@ function closeVoicesModal() {
 window.openVoicesModal = openVoicesModal;
 window.closeVoicesModal = closeVoicesModal;
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function renderHistoryList() {
+  const container = document.getElementById('historyList');
+  if (!container) return;
+  if (notificationHistory.length === 0) {
+    container.innerHTML = '<div class="empty-list-msg">Nessuna notifica ricevuta finora.</div>';
+    return;
+  }
+  container.innerHTML = notificationHistory.map(entry => {
+    const time = new Date(entry.ts).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    let icon = '🔔', label = '', rowClass = '';
+    if (entry.type === 'score') {
+      icon = entry.team === 'home' ? '🏀' : '⚡';
+      rowClass = entry.team === 'home' ? 'hist-home' : 'hist-away';
+      label = `${escapeHtml(entry.name)} ${escapeHtml(entry.text)}`;
+    } else if (entry.type === 'ft') {
+      rowClass = 'hist-ft';
+      if (entry.kind === 'award') { icon = '🚨'; label = `Tiri liberi assegnati a ${escapeHtml(entry.name)}`; }
+      else if (entry.kind === 'made') { icon = '✅'; label = `${escapeHtml(entry.name)} segna il libero`; }
+      else { icon = '❌'; label = `${escapeHtml(entry.name)} sbaglia il libero`; }
+    }
+    return `<div class="history-row ${rowClass}">
+      <span class="history-icon">${icon}</span>
+      <span class="history-text">${label}</span>
+      <span class="history-time">${time}</span>
+    </div>`;
+  }).join('');
+}
+
+function openHistoryModal() {
+  renderHistoryList();
+  document.getElementById('historyModalOverlay').classList.add('open');
+  document.getElementById('historyFabDot').classList.remove('show');
+  historyModalOpen = true;
+}
+
+function closeHistoryModal() {
+  document.getElementById('historyModalOverlay').classList.remove('open');
+  historyModalOpen = false;
+}
+
+function clearNotificationHistory() {
+  if (confirm('Svuotare lo storico delle notifiche su questo dispositivo?')) {
+    notificationHistory = [];
+    localStorage.setItem('live_notification_history', JSON.stringify(notificationHistory));
+    renderHistoryList();
+  }
+}
+
+window.openHistoryModal = openHistoryModal;
+window.closeHistoryModal = closeHistoryModal;
+window.clearNotificationHistory = clearNotificationHistory;
+
 const unsubscribe = onSnapshot(
   docRef,
   (docSnap) => {
@@ -1161,6 +1371,7 @@ function detectChanges(data) {
       headline: scoreExclamation(scoreDelta)
     };
     localStorage.setItem('live_last_notification', JSON.stringify(currentNotification));
+    addToHistory({ type: 'score', team: 'home', name: scorerName, text: '+' + scoreDelta });
   }
   else if (awayScore > prevAwayScore) {
     const delta = awayScore - prevAwayScore;
@@ -1171,6 +1382,7 @@ function detectChanges(data) {
       headline: '⚡ Punto avversario'
     };
     localStorage.setItem('live_last_notification', JSON.stringify(currentNotification));
+    addToHistory({ type: 'score', team: 'away', name: awayTeam, text: '+' + delta });
   }
   else if (homeScore < prevHomeScore || awayScore < prevAwayScore) {
     currentNotification = null;
@@ -1283,6 +1495,7 @@ function updateUI(data) {
   if (ftEvent && ftEvent.ts && ftEvent.ts !== prevFtEventTs) {
     prevFtEventTs = ftEvent.ts;
     showFtBanner(ftEvent);
+    addToHistory({ type: 'ft', kind: ftEvent.kind || 'award', name: ftEvent.name || '-', ts: ftEvent.ts });
   }
 
   updateVoices(comments);
