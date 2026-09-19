@@ -712,6 +712,105 @@
     margin-top: 4px;
   }
 
+  .spectator-name-row {
+    margin-bottom: 18px;
+  }
+  .spectator-name-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    display: block;
+  }
+  .spectator-name-input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    padding: 8px 10px;
+    outline: none;
+  }
+  .spectator-name-input:focus { border-color: var(--orange); }
+
+  .reply-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .reply-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    background: rgba(0,0,0,0.18);
+    border-radius: 8px;
+    padding: 6px 9px;
+    font-size: 13px;
+  }
+
+  .reply-name {
+    font-weight: 800;
+    color: var(--orange);
+    flex-shrink: 0;
+  }
+
+  .reply-text {
+    flex: 1;
+    min-width: 0;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  .reply-time {
+    font-size: 10px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .reply-input-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .reply-input {
+    flex: 1;
+    min-width: 0;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+  }
+  .reply-input:focus { border-color: var(--orange); }
+
+  .reply-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--orange);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .reply-send-btn:active { transform: scale(.9); }
+
   /* ─── STORICO NOTIFICHE ─── */
   .history-fab {
     position: fixed;
@@ -994,11 +1093,23 @@
   <div class="voices-modal">
     <div class="voices-modal-title">🗣️ Voci dallo Stadio</div>
 
+    <div class="spectator-name-row">
+      <label class="spectator-name-label" for="spectatorNameInput">Il tuo nome (facoltativo)</label>
+      <input type="text" class="spectator-name-input" id="spectatorNameInput" maxlength="24" placeholder="Es. Papà di Luca"
+        oninput="localStorage.setItem('live_spectator_name', this.value)">
+    </div>
+
     <div class="voice-row">
       <div class="voice-icon-wrap becero" id="modal-icon-becero"></div>
       <div class="speech-bubble becero">
         <div class="voice-label">Il Tifoso Becero</div>
         <div class="voice-text placeholder" id="modal-text-becero">In attesa di un commento...</div>
+        <div class="reply-thread" id="reply-thread-becero"></div>
+        <div class="reply-input-row">
+          <input type="text" class="reply-input" id="reply-input-becero" maxlength="140" placeholder="Rispondi..."
+            onkeydown="if(event.key==='Enter'){sendReply('becero');}">
+          <button class="reply-send-btn" onclick="sendReply('becero')" title="Invia risposta">➤</button>
+        </div>
       </div>
     </div>
     <div class="voice-row">
@@ -1006,6 +1117,12 @@
       <div class="speech-bubble giornalista">
         <div class="voice-label">Il Giornalista Obiettivo</div>
         <div class="voice-text placeholder" id="modal-text-giornalista">In attesa di un commento...</div>
+        <div class="reply-thread" id="reply-thread-giornalista"></div>
+        <div class="reply-input-row">
+          <input type="text" class="reply-input" id="reply-input-giornalista" maxlength="140" placeholder="Rispondi..."
+            onkeydown="if(event.key==='Enter'){sendReply('giornalista');}">
+          <button class="reply-send-btn" onclick="sendReply('giornalista')" style="background:var(--blue-mid);" title="Invia risposta">➤</button>
+        </div>
       </div>
     </div>
     <div class="voice-row">
@@ -1013,6 +1130,12 @@
       <div class="speech-bubble sfegatato">
         <div class="voice-label">Il Tifoso Sfegatato</div>
         <div class="voice-text placeholder" id="modal-text-sfegatato">In attesa di un commento...</div>
+        <div class="reply-thread" id="reply-thread-sfegatato"></div>
+        <div class="reply-input-row">
+          <input type="text" class="reply-input" id="reply-input-sfegatato" maxlength="140" placeholder="Rispondi..."
+            onkeydown="if(event.key==='Enter'){sendReply('sfegatato');}">
+          <button class="reply-send-btn" onclick="sendReply('sfegatato')" title="Invia risposta">➤</button>
+        </div>
       </div>
     </div>
 
@@ -1031,7 +1154,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, onSnapshot, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBVZImhiol10qV9LxZRO53Ek47xm3fDePU",
@@ -1228,6 +1351,11 @@ function openVoicesModal() {
   document.getElementById('voicesModalOverlay').classList.add('open');
   document.getElementById('voicesFabDot').classList.remove('show');
   voicesModalOpen = true;
+  const nameEl = document.getElementById('spectatorNameInput');
+  if (nameEl) {
+    const savedName = localStorage.getItem('live_spectator_name');
+    if (savedName) nameEl.value = savedName;
+  }
 }
 
 function closeVoicesModal() {
@@ -1236,6 +1364,47 @@ function closeVoicesModal() {
 }
 window.openVoicesModal = openVoicesModal;
 window.closeVoicesModal = closeVoicesModal;
+
+function renderReplies(commentReplies) {
+  commentReplies = commentReplies || {};
+  ['becero', 'giornalista', 'sfegatato'].forEach(key => {
+    const container = document.getElementById('reply-thread-' + key);
+    if (!container) return;
+    const list = commentReplies[key] || [];
+    if (list.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+    const sorted = [...list].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    container.innerHTML = sorted.map(r => {
+      const time = new Date(r.ts).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      return `<div class="reply-item"><span class="reply-name">${escapeHtml(r.name || 'Spettatore')}</span><span class="reply-text">${escapeHtml(r.text)}</span><span class="reply-time">${time}</span></div>`;
+    }).join('');
+  });
+}
+
+async function sendReply(key) {
+  const input = document.getElementById('reply-input-' + key);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  const nameEl = document.getElementById('spectatorNameInput');
+  const name = (nameEl && nameEl.value.trim()) || 'Spettatore';
+
+  const reply = { name: name, text: text, ts: Date.now() };
+  input.value = '';
+  input.disabled = true;
+
+  try {
+    await updateDoc(docRef, { [`commentReplies.${key}`]: arrayUnion(reply) });
+  } catch (e) {
+    console.error('Errore invio risposta:', e);
+  }
+  input.disabled = false;
+  input.focus();
+}
+window.sendReply = sendReply;
 
 function escapeHtml(str) {
   return String(str)
@@ -1485,7 +1654,8 @@ function updateUI(data) {
     timerRunning: docTimerRunning = false,
     timerEndAt: docTimerEndAt = null,
     ftEvent = null,
-    comments = null
+    comments = null,
+    commentReplies = null
   } = data;
 
   timerSecondsStatic = timerSeconds;
@@ -1504,6 +1674,7 @@ function updateUI(data) {
   }
 
   updateVoices(comments);
+  renderReplies(commentReplies);
 
   document.getElementById('homeTeamName').textContent = homeTeam || 'PONTE';
   document.getElementById('awayTeamName').textContent = awayTeam || 'AVV';
