@@ -241,6 +241,150 @@
     padding: 1px 2px;
   }
 
+  .view-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px 0 2px;
+  }
+  .view-tab-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-dim);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .view-tab-btn:active { transform: scale(.97); }
+  .view-tab-btn.active {
+    background: var(--orange);
+    color: white;
+    border-color: var(--orange);
+  }
+
+  .sub-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 18px 4px 8px;
+  }
+  .sub-section-title:first-child { margin-top: 4px; }
+  .sub-title-court { color: #2196F3; }
+  .sub-title-absent { color: var(--foul-red); }
+
+  .sub-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sub-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .sub-row-court {
+    border-color: rgba(33,150,243,0.4);
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, var(--surface) 100%);
+  }
+  .sub-row-absent { opacity: 0.55; }
+
+  .sub-jersey {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-dim);
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .sub-name-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    flex: 1;
+    min-width: 0;
+    outline: none;
+    padding: 2px 2px;
+  }
+  .sub-name-input:focus { border-color: var(--orange); }
+
+  .sub-stats {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    min-width: 46px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .sub-action-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .3px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: transform .12s, filter .12s;
+  }
+  .sub-action-btn:active { transform: scale(.93); filter: brightness(1.25); }
+
+  .sub-action-btn.sub-exit {
+    background: rgba(255,255,255,0.08);
+    color: var(--text-dim);
+  }
+  .sub-action-btn.sub-enter {
+    background: rgba(33,150,243,0.2);
+    color: #2196F3;
+    border: 1px solid rgba(33,150,243,0.4);
+  }
+  .sub-action-btn.sub-present {
+    background: rgba(76,175,80,0.2);
+    color: var(--green);
+    border: 1px solid rgba(76,175,80,0.4);
+  }
+
+  .sub-absent-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(239,83,80,0.12);
+    color: var(--foul-red);
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sub-absent-btn:active { transform: scale(.88); }
+
   .main {
     padding: 12px 10px;
     max-width: 700px;
@@ -1115,11 +1259,18 @@
         </div>
       </div>
     </div>
+
+    <div class="view-tabs">
+      <button class="view-tab-btn active" id="tabScoreBtn" onclick="switchTab('score')">🏀 Punteggio</button>
+      <button class="view-tab-btn" id="tabSubsBtn" onclick="switchTab('subs')">🔄 Sostituzioni</button>
+    </div>
   </header>
 
   <div class="main" id="playerList"></div>
 
-  <div class="main" style="padding-top: 0;">
+  <div class="main" id="substitutionsView" style="display:none;"></div>
+
+  <div class="main" id="totalsBarWrapper" style="padding-top: 0;">
     <div class="totals-bar" style="margin-top: 0;">
       <div>
         <div class="totals-label">Totale Punti</div>
@@ -1484,7 +1635,7 @@ function renderNav() {
   inner.innerHTML = '';
 
   players.forEach((p, i) => {
-    if (!p.active) return;
+    if (!p.active || !p.onCourt) return;
 
     const jerseyNum = extractJerseyNumber(p.name);
     const pts = totalPts(p);
@@ -1524,14 +1675,21 @@ function render() {
   const list = document.getElementById('playerList');
   list.innerHTML = '';
 
-  const sorted = players.map((p, i) => ({ p, i }))
-    .sort((a, b) => (b.p.active ? 1 : 0) - (a.p.active ? 1 : 0));
+  const onCourtPlayers = players.map((p, i) => ({ p, i }))
+    .filter(({ p }) => p.active && p.onCourt);
 
-  sorted.forEach(({ p, i }) => {
+  if (onCourtPlayers.length === 0) {
+    list.innerHTML = '<div class="empty-list-msg" style="padding:28px 10px; text-align:center; font-size:15px;">Nessun giocatore in campo.<br>Vai alla tab <b style="color:var(--orange)">🔄 Sostituzioni</b> per schierare i 5 titolari.</div>';
+    updateTotals();
+    renderNav();
+    return;
+  }
+
+  onCourtPlayers.forEach(({ p, i }) => {
     const tot = totalPts(p);
     const foulDanger = p.fouls >= 5;
     const card = document.createElement('div');
-    card.className = 'player-card' + (p.active ? '' : ' player-inactive') + (p.active && p.onCourt ? ' on-court-card' : '');
+    card.className = 'player-card on-court-card';
     card.id = `player-card-${i}`;
     card.innerHTML = `
       <div class="player-header">
@@ -1539,17 +1697,8 @@ function render() {
         <input class="player-name-input" value="${p.name}" 
           onchange="players[${i}].name=this.value; save(); renderNav();" 
           oninput="players[${i}].name=this.value; save(); renderNav();">
-        <button class="btn-presence ${p.active ? 'present' : 'absent'}" onclick="toggleActive(${i})" title="${p.active ? 'Presente' : 'Assente'}">
-          ${p.active ? '✓ Pres' : '✗ Ass'}
-        </button>
-        ${p.active ? `
-        <button class="btn-oncourt ${p.onCourt ? 'on-court' : 'bench'}" onclick="toggleOnCourt(${i})" title="${p.onCourt ? 'In campo' : 'In panchina'}">
-          ${p.onCourt ? '🏃 Campo' : '🪑 Panch'}
-        </button>
-        ` : ''}
         <div class="player-total-badge" id="badge-${i}">${tot}</div>
       </div>
-      ${p.active ? `
       <div class="player-controls">
         <div class="pts-row">
           <div class="pt-group">
@@ -1609,7 +1758,6 @@ function render() {
           <button class="btn-foul" onclick="addFoul(${i},1)">+</button>
         </div>
       </div>
-      ` : ''}
     `;
     list.appendChild(card);
   });
@@ -1641,6 +1789,105 @@ function toggleOnCourt(idx) {
   players[idx].onCourt = !players[idx].onCourt;
   render();
   save();
+}
+
+let currentTab = 'score';
+
+function switchTab(tab) {
+  currentTab = tab;
+  const scoreBtn = document.getElementById('tabScoreBtn');
+  const subsBtn = document.getElementById('tabSubsBtn');
+  const playerListEl = document.getElementById('playerList');
+  const subsViewEl = document.getElementById('substitutionsView');
+  const totalsWrapper = document.getElementById('totalsBarWrapper');
+  const nav = document.getElementById('playerNav');
+
+  if (tab === 'subs') {
+    scoreBtn.classList.remove('active');
+    subsBtn.classList.add('active');
+    playerListEl.style.display = 'none';
+    if (totalsWrapper) totalsWrapper.style.display = 'none';
+    if (nav) nav.style.display = 'none';
+    subsViewEl.style.display = 'block';
+    renderSubstitutions();
+  } else {
+    subsBtn.classList.remove('active');
+    scoreBtn.classList.add('active');
+    subsViewEl.style.display = 'none';
+    playerListEl.style.display = '';
+    if (totalsWrapper) totalsWrapper.style.display = '';
+    if (nav) nav.style.display = '';
+    render();
+  }
+}
+
+function subToggleCourt(idx) {
+  toggleOnCourt(idx);
+  renderSubstitutions();
+}
+
+function subTogglePresence(idx) {
+  toggleActive(idx);
+  renderSubstitutions();
+}
+
+function renderSubstitutions() {
+  const container = document.getElementById('substitutionsView');
+  if (!container) return;
+
+  const onCourtList = [];
+  const benchList = [];
+  const absentList = [];
+
+  players.forEach((p, i) => {
+    if (!p.active) absentList.push({ p, i });
+    else if (p.onCourt) onCourtList.push({ p, i });
+    else benchList.push({ p, i });
+  });
+
+  function row({ p, i }, kind) {
+    const jersey = extractJerseyNumber(p.name);
+    const tot = totalPts(p);
+    const statsText = tot > 0 || p.fouls > 0 ? `${tot}pt${p.fouls ? ' · ' + p.fouls + 'f' : ''}` : '';
+    let actionBtn = '';
+    if (kind === 'court') {
+      actionBtn = `<button class="sub-action-btn sub-exit" onclick="subToggleCourt(${i})">⬇ Panchina</button>`;
+    } else if (kind === 'bench') {
+      actionBtn = `<button class="sub-action-btn sub-enter" onclick="subToggleCourt(${i})">⬆ In campo</button>`;
+    } else {
+      actionBtn = `<button class="sub-action-btn sub-present" onclick="subTogglePresence(${i})">✓ Presente</button>`;
+    }
+    const absentBtn = kind !== 'absent'
+      ? `<button class="sub-absent-btn" onclick="subTogglePresence(${i})" title="Segna assente">✗</button>`
+      : '';
+    return `
+      <div class="sub-row ${kind === 'court' ? 'sub-row-court' : ''}${kind === 'absent' ? ' sub-row-absent' : ''}">
+        <span class="sub-jersey">${jersey}</span>
+        <input class="sub-name-input" value="${p.name}"
+          onchange="players[${i}].name=this.value; save(); renderNav();"
+          oninput="players[${i}].name=this.value; save();">
+        <span class="sub-stats">${statsText}</span>
+        ${actionBtn}
+        ${absentBtn}
+      </div>`;
+  }
+
+  container.innerHTML = `
+    <div class="sub-section-title sub-title-court">🏀 In Campo (${onCourtList.length}/5)</div>
+    <div class="sub-section">
+      ${onCourtList.length ? onCourtList.map(x => row(x, 'court')).join('') : '<div class="empty-list-msg">Nessun titolare selezionato.</div>'}
+    </div>
+
+    <div class="sub-section-title">🪑 In Panchina</div>
+    <div class="sub-section">
+      ${benchList.length ? benchList.map(x => row(x, 'bench')).join('') : '<div class="empty-list-msg">Nessuno in panchina.</div>'}
+    </div>
+
+    <div class="sub-section-title sub-title-absent">🚫 Assenti</div>
+    <div class="sub-section">
+      ${absentList.length ? absentList.map(x => row(x, 'absent')).join('') : '<div class="empty-list-msg">Tutti i convocati sono presenti.</div>'}
+    </div>
+  `;
 }
 
 function addPt(idx, type, delta) {
@@ -1906,6 +2153,7 @@ function confirmReset() {
     closeStats();
     render();
     renderTimer();
+    renderSubstitutions();
     save();
 
     // Forza la pulizia dei commenti anche su Firestore
