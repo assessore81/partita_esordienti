@@ -891,6 +891,23 @@
   .voice-send-btn:active { transform: scale(.97); }
   .voice-send-btn:disabled { opacity: .6; }
 
+  .voice-whatsapp-btn {
+    width: 100%;
+    background: #25D366;
+    color: #062f1a;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .voice-whatsapp-btn:active { transform: scale(.97); }
+
   .voice-lastsent {
     font-size: 11px;
     color: var(--text-dim);
@@ -1350,6 +1367,7 @@
         <textarea class="voice-textarea" id="voice-input-becero" placeholder="Cosa urla il tifoso becero? 🤬"></textarea>
         <div class="emoji-row" id="emoji-becero"></div>
         <button class="voice-send-btn" id="voice-send-becero" onclick="sendComment('becero')">📢 Invia al Tabellone</button>
+        <button class="voice-whatsapp-btn" onclick="shareToWhatsApp('becero')">📲 Condividi su WhatsApp</button>
         <div class="voice-lastsent" id="lastsent-becero"></div>
         <div class="reply-thread-admin" id="admin-reply-thread-becero"></div>
       </div>
@@ -1365,6 +1383,7 @@
         <textarea class="voice-textarea" id="voice-input-giornalista" placeholder="Il commento imparziale del giornalista... 🎙️"></textarea>
         <div class="emoji-row" id="emoji-giornalista"></div>
         <button class="voice-send-btn" id="voice-send-giornalista" onclick="sendComment('giornalista')" style="background:var(--blue-mid);">📢 Invia al Tabellone</button>
+        <button class="voice-whatsapp-btn" onclick="shareToWhatsApp('giornalista')">📲 Condividi su WhatsApp</button>
         <div class="voice-lastsent" id="lastsent-giornalista"></div>
         <div class="reply-thread-admin" id="admin-reply-thread-giornalista"></div>
       </div>
@@ -1380,6 +1399,7 @@
         <textarea class="voice-textarea" id="voice-input-sfegatato" placeholder="Il grido di battaglia del super tifoso! 🔥"></textarea>
         <div class="emoji-row" id="emoji-sfegatato"></div>
         <button class="voice-send-btn" id="voice-send-sfegatato" onclick="sendComment('sfegatato')">📢 Invia al Tabellone</button>
+        <button class="voice-whatsapp-btn" onclick="shareToWhatsApp('sfegatato')">📲 Condividi su WhatsApp</button>
         <div class="voice-lastsent" id="lastsent-sfegatato"></div>
         <div class="reply-thread-admin" id="admin-reply-thread-sfegatato"></div>
       </div>
@@ -2408,6 +2428,29 @@ function openVoices() {
 
 function closeVoices() {
   document.getElementById('voicesModal').classList.remove('open');
+}
+
+const WHATSAPP_VOICE_LABELS = {
+  becero: '😡 Il Tifoso Becero',
+  giornalista: '🎙️ Il Giornalista Obiettivo',
+  sfegatato: '🔥 Il Tifoso Sfegatato'
+};
+
+function shareToWhatsApp(key) {
+  const ta = document.getElementById('voice-input-' + key);
+  const text = ta.value.trim();
+  if (!text) {
+    alert('Scrivi prima un messaggio da condividere!');
+    return;
+  }
+  const homeName = document.getElementById('homeName').value || 'PONTE DI NONA';
+  const awayName = document.getElementById('awayName').value || 'AVVERSARIO';
+  const homeScore = document.getElementById('homeScore').textContent || '0';
+  const awayScore = document.getElementById('awayScore').textContent || '0';
+  const label = WHATSAPP_VOICE_LABELS[key] || '';
+  const message = `🏀 ${homeName} ${homeScore} - ${awayScore} ${awayName}\n\n${label}:\n"${text}"`;
+  const url = 'https://wa.me/?text=' + encodeURIComponent(message);
+  window.open(url, '_blank');
 }
 
 function escapeHtmlAdmin(str) {
