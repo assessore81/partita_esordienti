@@ -850,6 +850,7 @@ const DEFAULT_PLAYERS = [
   { name: '6 - RAZVAN',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
   { name: '7 - GIOELE',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
   { name: '10 - LUCA',       pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '11 - EDOARDO G.',  pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
   { name: '14 - MATTEO M.',  pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
   { name: '20 - LORENZO A.', pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
   { name: '22 - TOMMASO',    pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
@@ -860,9 +861,9 @@ const DEFAULT_PLAYERS = [
   { name: '73 - LUIGI',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
   { name: '77 - MATTEO L.',  pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
   { name: '81 - LORENZO L.', pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
-  { name: '86 - GIULIO',     pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
   { name: '82 - DAVID',      pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
-  { name: '?? - EDOARDO ?',  pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  { name: '86 - GIULIO',     pt1:0, pt2:0, pt3:0, fouls:0, ftMade:0, ftMissed:0, active:true, onCourt:false },
+  
 ];
 
 let players = JSON.parse(localStorage.getItem('bball_players') || 'null') || DEFAULT_PLAYERS.map(p => ({...p}));
