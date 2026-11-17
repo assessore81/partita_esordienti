@@ -320,6 +320,42 @@
     100% { transform: scale(1) rotate(0deg); }
   }
 
+  /* ─── SUB EVENT BANNER (cambi) ─── */
+  .sub-event-banner {
+    background: var(--surface);
+    border-radius: 15px;
+    border-left: 4px solid #2196F3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 20px;
+    margin-bottom: 0;
+    transition: opacity 0.35s ease, max-height 0.35s ease, padding 0.35s ease, margin 0.35s ease;
+  }
+  .sub-event-banner.show {
+    opacity: 1;
+    max-height: 140px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+  }
+  .sub-event-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: #64b5f6;
+    margin-bottom: 4px;
+  }
+  .sub-event-line {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 19px; font-weight: 700; color: var(--text);
+    line-height: 1.25;
+  }
+  .sub-event-line.sub-in { color: var(--green); }
+  .sub-event-line.sub-out { color: var(--text-dim); }
+  .sub-event-icon { font-size: 30px; animation: ftIconPop 0.5s ease-out; }
+
   /* ─── LAST SCORER ─── */
   .last-scorer-section {
     background: var(--surface);
@@ -928,6 +964,15 @@
       <div class="ft-event-icon" id="ftEventIcon">🎯</div>
     </div>
 
+    <div class="sub-event-banner" id="subEventBanner">
+      <div>
+        <div class="sub-event-label">🔄 CAMBIO</div>
+        <div class="sub-event-line sub-in" id="subEventIn"></div>
+        <div class="sub-event-line sub-out" id="subEventOut"></div>
+      </div>
+      <div class="sub-event-icon">🔄</div>
+    </div>
+
     <div class="last-scorer-section" id="lastScorerSection" style="display: none;">
       <div class="last-scorer-label" id="lastScorerLabel">⭐ Ultimo marcatore</div>
       <div class="last-scorer-info">
@@ -1438,6 +1483,28 @@ function showFtBanner(ftEvent) {
   }, 4000);
 }
 
+let prevSubEventTs = null;
+let subBannerTimeout = null;
+let subEventInitialized = false;
+
+function showSubBanner(ev) {
+  const banner = document.getElementById('subEventBanner');
+  const lineIn = document.getElementById('subEventIn');
+  const lineOut = document.getElementById('subEventOut');
+  if (!banner) return;
+
+  lineIn.textContent = ev.inName ? '⬆ Entra ' + ev.inName : '';
+  lineOut.textContent = ev.outName ? '⬇ Esce ' + ev.outName : '';
+  lineIn.style.display = ev.inName ? '' : 'none';
+  lineOut.style.display = ev.outName ? '' : 'none';
+
+  if (subBannerTimeout) clearTimeout(subBannerTimeout);
+  banner.classList.remove('show');
+  void banner.offsetWidth;
+  banner.classList.add('show');
+  subBannerTimeout = setTimeout(() => banner.classList.remove('show'), 5000);
+}
+
 function updateUI(data) {
   const {
     homeTeam = 'PONTE',
@@ -1451,6 +1518,7 @@ function updateUI(data) {
     timerRunning: docTimerRunning = false,
     timerEndAt: docTimerEndAt = null,
     ftEvent = null,
+    subEvent = null,
     comments = null,
     commentReplies = null
   } = data;
@@ -1467,6 +1535,13 @@ function updateUI(data) {
     if (!isFirstFtLoad) {
       showFtBanner(ftEvent);
     }
+  }
+
+  if (subEvent && subEvent.ts && subEvent.ts !== prevSubEventTs) {
+    const isFirstSubLoad = !subEventInitialized;
+    prevSubEventTs = subEvent.ts;
+    subEventInitialized = true;
+    if (!isFirstSubLoad) showSubBanner(subEvent);
   }
 
   updateVoices(comments);
